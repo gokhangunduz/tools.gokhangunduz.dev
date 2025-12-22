@@ -1,0 +1,63 @@
+{
+  "app": {
+    "name": "tools.gokhangunduz.dev",
+    "short": "tools",
+    "tagline": "Fast, ad-free developer tools that run in your browser",
+    "description": "Base64, JWT, hashes, JSON, cron and dozens more. Nothing you type leaves your browser."
+  },
+  "search": {
+    "placeholder": "Search tools, or paste something…",
+    "empty": "No matching tool",
+    "detected": "What you pasted looks like:",
+    "hint": "type to search, arrows to move"
+  },
+  "nav": {
+    "home": "Home",
+    "allTools": "All tools",
+    "categories": "Categories",
+    "openPalette": "Search tools",
+    "toolCount": "{count} tools"
+  },
+  "tool": {
+    "input": "Input",
+    "output": "Output",
+    "options": "Options",
+    "copy": "Copy",
+    "copied": "Copied",
+    "clear": "Clear",
+    "paste": "Paste",
+    "sample": "Load sample",
+    "download": "Download",
+    "share": "Copy link",
+    "shared": "Link copied",
+    "swap": "Swap direction",
+    "related": "Related tools",
+    "emptyOutput": "Output will appear here",
+    "favorite": "Add to favourites",
+    "unfavorite": "Remove from favourites"
+  },
+  "home": {
+    "favorites": "Favourites",
+    "recent": "Recently used",
+    "noFavorites": "Star a tool and it stays here."
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "locale": {
+    "label": "Language",
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "error": {
+    "notFound": "No such tool.",
+    "backHome": "Back to home"
+  },
+  "footer": {
+    "privacy": "Everything runs in your browser; your input never reaches a server.",
+    "source": "Source code"
+  }
+}
