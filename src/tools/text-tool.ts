@@ -39,17 +39,32 @@ export type ToolOption =
 /**
  * One direction of a reversible tool — "encode" and "decode", say.
  *
- * `run` throws on bad input. The message is shown to the user as written, so
- * it is localized copy, not a developer's exception string.
+ * `run` throws on bad input, or rejects if it is async. The message is shown
+ * to the user as written, so it is localized copy, not a developer's
+ * exception string.
+ *
+ * Returning a promise is for work that cannot be synchronous — WebCrypto and
+ * anything behind a wasm module — not for work that is merely slow. The
+ * component shows the previous result until the new one resolves.
  */
 export type Direction = {
   id: string;
   label: Localized;
-  run: (input: string, options: OptionValues) => string;
+  run: (input: string, options: OptionValues) => string | Promise<string>;
   /** Prefilled when the user asks for a sample, per direction. */
   sample?: string;
   /** Overrides the input box placeholder for this direction. */
   placeholder?: Localized;
+  /**
+   * One line under the output, for the fact the result does not carry — how
+   * much a compression saved, how long a hash is, when a token expires.
+   * Returns null when there is nothing worth saying.
+   */
+  footnote?: (
+    input: string,
+    output: string,
+    options: OptionValues,
+  ) => Localized | null;
 };
 
 export type TextToolSpec = {

@@ -2,7 +2,20 @@ import type { Locale } from "@/i18n";
 import { CATEGORIES } from "./categories";
 import type { CategoryId, ToolMeta } from "./types";
 
+import { meta as aes } from "./aes/meta";
 import { meta as base64Text } from "./base64-text/meta";
+import { meta as bcrypt } from "./bcrypt/meta";
+import { meta as binaryText } from "./binary-text/meta";
+import { meta as gzip } from "./gzip/meta";
+import { meta as hashText } from "./hash-text/meta";
+import { meta as hexText } from "./hex-text/meta";
+import { meta as hmac } from "./hmac/meta";
+import { meta as htmlEntity } from "./html-entity/meta";
+import { meta as jwtDecode } from "./jwt-decode/meta";
+import { meta as jwtGenerate } from "./jwt-generate/meta";
+import { meta as unicodeEscape } from "./unicode-escape/meta";
+import { meta as urlEncode } from "./url-encode/meta";
+import { meta as urlParse } from "./url-parse/meta";
 
 /**
  * Every tool on the site, in one list.
@@ -12,7 +25,22 @@ import { meta as base64Text } from "./base64-text/meta";
  * metadata and the "related tools" links are all derived from this array.
  * Nothing else enumerates tools.
  */
-export const TOOLS: ToolMeta[] = [base64Text];
+export const TOOLS: ToolMeta[] = [
+  base64Text,
+  urlEncode,
+  urlParse,
+  htmlEntity,
+  unicodeEscape,
+  hexText,
+  binaryText,
+  gzip,
+  hashText,
+  hmac,
+  bcrypt,
+  aes,
+  jwtDecode,
+  jwtGenerate,
+];
 
 export const TOOL_BY_ID: Map<string, ToolMeta> = new Map(
   TOOLS.map((tool) => [tool.id, tool]),
