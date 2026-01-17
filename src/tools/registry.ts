@@ -6,16 +6,30 @@ import { meta as aes } from "./aes/meta";
 import { meta as base64Text } from "./base64-text/meta";
 import { meta as bcrypt } from "./bcrypt/meta";
 import { meta as binaryText } from "./binary-text/meta";
+import { meta as curlFetch } from "./curl-fetch/meta";
+import { meta as dockerRunCompose } from "./docker-run-compose/meta";
+import { meta as envJson } from "./env-json/meta";
+import { meta as formatCode } from "./format-code/meta";
 import { meta as gzip } from "./gzip/meta";
 import { meta as hashText } from "./hash-text/meta";
 import { meta as hexText } from "./hex-text/meta";
 import { meta as hmac } from "./hmac/meta";
 import { meta as htmlEntity } from "./html-entity/meta";
+import { meta as htmlJsx } from "./html-jsx/meta";
+import { meta as jsonCsv } from "./json-csv/meta";
+import { meta as jsonToml } from "./json-toml/meta";
+import { meta as jsonXml } from "./json-xml/meta";
+import { meta as jsonToTypes } from "./json-to-types/meta";
+import { meta as jsonYaml } from "./json-yaml/meta";
 import { meta as jwtDecode } from "./jwt-decode/meta";
 import { meta as jwtGenerate } from "./jwt-generate/meta";
+import { meta as markdownHtml } from "./markdown-html/meta";
+import { meta as minifyTool } from "./minify/meta";
+import { meta as sqlFormat } from "./sql-format/meta";
 import { meta as unicodeEscape } from "./unicode-escape/meta";
 import { meta as urlEncode } from "./url-encode/meta";
 import { meta as urlParse } from "./url-parse/meta";
+import { meta as xmlFormat } from "./xml-format/meta";
 
 /**
  * Every tool on the site, in one list.
@@ -40,6 +54,20 @@ export const TOOLS: ToolMeta[] = [
   aes,
   jwtDecode,
   jwtGenerate,
+  formatCode,
+  sqlFormat,
+  xmlFormat,
+  minifyTool,
+  jsonYaml,
+  jsonToml,
+  jsonXml,
+  jsonCsv,
+  jsonToTypes,
+  markdownHtml,
+  htmlJsx,
+  curlFetch,
+  dockerRunCompose,
+  envJson,
 ];
 
 export const TOOL_BY_ID: Map<string, ToolMeta> = new Map(
