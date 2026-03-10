@@ -34,7 +34,8 @@
     "related": "İlgili araçlar",
     "emptyOutput": "Çıktı burada görünecek",
     "favorite": "Favorilere ekle",
-    "unfavorite": "Favorilerden çıkar"
+    "unfavorite": "Favorilerden çıkar",
+    "generate": "Üret"
   },
   "home": {
     "favorites": "Favoriler",
@@ -59,5 +60,9 @@
   "footer": {
     "privacy": "Her şey tarayıcında çalışır; girdiğin veri sunucuya gitmez.",
     "source": "Kaynak kod"
+  },
+  "reference": {
+    "filter": "Tabloda ara…",
+    "count": "{shown} / {total} satır"
   }
 }
