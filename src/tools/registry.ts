@@ -7,6 +7,19 @@ import { meta as base64Text } from "./base64-text/meta";
 import { meta as bcrypt } from "./bcrypt/meta";
 import { meta as binaryText } from "./binary-text/meta";
 import { meta as bitwise } from "./bitwise/meta";
+import { meta as cidr } from "./cidr/meta";
+import { meta as dnsLookup } from "./dns-lookup/meta";
+import { meta as httpStatus } from "./http-status/meta";
+import { meta as ipConvert } from "./ip-convert/meta";
+import { meta as ipGeo } from "./ip-geo/meta";
+import { meta as mimeType } from "./mime-type/meta";
+import { meta as rdap } from "./rdap/meta";
+import { meta as userAgent } from "./user-agent/meta";
+import { meta as mockJson } from "./mock-json/meta";
+import { meta as password } from "./password/meta";
+import { meta as rsaKey } from "./rsa-key/meta";
+import { meta as totp } from "./totp/meta";
+import { meta as uuid } from "./uuid/meta";
 import { meta as byteSize } from "./byte-size/meta";
 import { meta as chmod } from "./chmod/meta";
 import { meta as cron } from "./cron/meta";
@@ -110,6 +123,19 @@ export const TOOLS: ToolMeta[] = [
   byteSize,
   chmod,
   semver,
+  uuid,
+  password,
+  mockJson,
+  rsaKey,
+  totp,
+  cidr,
+  ipConvert,
+  userAgent,
+  dnsLookup,
+  rdap,
+  ipGeo,
+  httpStatus,
+  mimeType,
 ];
 
 export const TOOL_BY_ID: Map<string, ToolMeta> = new Map(
