@@ -64,5 +64,15 @@
   "reference": {
     "filter": "Tabloda ara…",
     "count": "{shown} / {total} satır"
+  },
+  "file": {
+    "choose": "Dosya seç",
+    "drop": "Dosyayı buraya bırak ya da tıkla",
+    "working": "İşleniyor…"
+  },
+  "exif": {
+    "saveEdited": "Düzenlenmiş hali indir",
+    "stripAll": "Tüm EXIF'i sil ve indir",
+    "note": "Fotoğraf hiçbir yere yüklenmez; okuma da yazma da bu sekmede olur."
   }
 }
