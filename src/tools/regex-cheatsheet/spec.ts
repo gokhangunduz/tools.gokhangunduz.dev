@@ -1,0 +1,45 @@
+import type { ReferenceSpec } from "../reference-tool";
+
+export const spec: ReferenceSpec = {
+  columns: [
+    { tr: "Yazım", en: "Syntax" },
+    { tr: "Anlamı", en: "Meaning" },
+  ],
+  rows: [
+    [".", "Satır sonu dışında bir karakter / Any character except a newline"],
+    ["\\d \\D", "Rakam / rakam olmayan — Rakam: Unicode'da \\p{Nd} daha geniş"],
+    ["\\w \\W", "[A-Za-z0-9_] / dışı — Türkçe harfler dahil değil"],
+    ["\\s \\S", "Boşluk / boşluk olmayan"],
+    ["\\p{L} \\p{Nd}", "Unicode harf / rakam — u bayrağı gerekir"],
+    ["[abc] [^abc]", "Küme / kümenin dışı"],
+    ["a? a* a+", "0-1, 0-çok, 1-çok"],
+    ["a{2,4}", "En az 2, en çok 4 tekrar"],
+    ["a*? a+?", "Cimri tekrar — mümkün olan en azı / Lazy: as few as possible"],
+    ["^ $", "Satır/metin başı ve sonu — m bayrağıyla her satır"],
+    ["\\b \\B", "Kelime sınırı / sınır olmayan"],
+    ["(abc)", "Yakalayan grup — $1 ile kullanılır"],
+    ["(?:abc)", "Yakalamayan grup"],
+    ["(?<ad>abc)", "İsimli grup — groups.ad"],
+    ["\\1 \\k<ad>", "Aynı grubun tekrarı / A backreference to that group"],
+    ["a|b", "Ya da — grup içinde sınırlandır"],
+    ["(?=abc)", "İleri olumlu bakış / Positive lookahead"],
+    ["(?!abc)", "İleri olumsuz bakış / Negative lookahead"],
+    ["(?<=abc)", "Geri olumlu bakış / Positive lookbehind"],
+    ["(?<!abc)", "Geri olumsuz bakış / Negative lookbehind"],
+    ["g", "Tüm eşleşmeler / All matches"],
+    ["i", "Büyük-küçük harf duyarsız"],
+    ["m", "^ ve $ her satıra uygulanır"],
+    ["s", ". satır sonunu da kapsar / dotAll"],
+    ["u", "Unicode modu — \\p{} ve emoji için gerekli"],
+    ["y", "Yapışkan: lastIndex'ten başlar / Sticky"],
+    [
+      "$1 $<ad>",
+      "Değiştirmede grup referansı / Group reference in a replacement",
+    ],
+    ["$&", "Eşleşmenin tamamı / The whole match"],
+    [
+      "\\. \\* \\\\",
+      "Özel karakterleri kaçırma / Escaping a special character",
+    ],
+  ],
+};
