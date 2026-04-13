@@ -47,9 +47,14 @@ export default function DualTool({
     if (!left && !right) return { output: "", error: null, promise: null };
     try {
       const value = spec.run(left, right, values);
-      return value instanceof Promise
-        ? { output: "", error: null, promise: value }
-        : { output: value, error: null, promise: null };
+      if (value instanceof Promise) {
+        // Claim the rejection here, not only in the effect below: React's
+        // strict double-render discards the first promise before any effect
+        // runs, and an unclaimed rejection surfaces as an uncaught error.
+        value.catch(() => {});
+        return { output: "", error: null, promise: value };
+      }
+      return { output: value, error: null, promise: null };
     } catch (cause) {
       return { output: "", error: describe(cause, locale), promise: null };
     }
@@ -177,6 +182,7 @@ export default function DualTool({
         {error ? (
           <p
             role="alert"
+            data-tool-error
             className="min-h-24 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
           >
             {error}
