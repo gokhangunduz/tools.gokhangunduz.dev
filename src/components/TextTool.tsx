@@ -89,9 +89,14 @@ export default function TextTool({
     if (!input) return { output: "", error: null, promise: null };
     try {
       const value = active.run(input, values, locale);
-      return value instanceof Promise
-        ? { output: "", error: null, promise: value }
-        : { output: value, error: null, promise: null };
+      if (value instanceof Promise) {
+        // Claim the rejection here, not only in the effect below: React's
+        // strict double-render discards the first promise before any effect
+        // runs, and an unclaimed rejection surfaces as an uncaught error.
+        value.catch(() => {});
+        return { output: "", error: null, promise: value };
+      }
+      return { output: value, error: null, promise: null };
     } catch (cause) {
       return { output: "", error: describe(cause, locale), promise: null };
     }
@@ -208,7 +213,15 @@ export default function TextTool({
                 <PaneButton
                   icon={Wand2}
                   label={t(locale, "tool.sample")}
-                  onClick={() => setInput(sample)}
+                  onClick={() => {
+                    setInput(sample);
+                    if (active.sampleOptions) {
+                      setValues((current) => ({
+                        ...current,
+                        ...active.sampleOptions,
+                      }));
+                    }
+                  }}
                 />
               )}
               <PaneButton
@@ -272,6 +285,7 @@ export default function TextTool({
           {error ? (
             <p
               role="alert"
+              data-tool-error
               className="min-h-40 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
             >
               {error}
