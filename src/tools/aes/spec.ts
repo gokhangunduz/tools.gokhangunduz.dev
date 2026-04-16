@@ -7,6 +7,7 @@ export const spec: TextToolSpec = {
       id: "encrypt",
       label: { tr: "Şifrele", en: "Encrypt" },
       sample: "Bu not sadece parolayı bilenlerce okunabilir.",
+      sampleOptions: { passphrase: "ornek-parola" },
       run: (input, options) => encrypt(input, String(options.passphrase)),
       footnote: () => ({
         tr: "Çıktı: tuz ‖ iv ‖ şifreli veri, tek Base64 blok. Her şifrelemede farklıdır.",
