@@ -62,6 +62,12 @@ export type Direction = {
   ) => string | Promise<string>;
   /** Prefilled when the user asks for a sample, per direction. */
   sample?: string;
+  /**
+   * Option values the sample needs to make sense — a key for a tool that
+   * signs, a passphrase for one that encrypts. Without these the sample
+   * button demonstrates an error message.
+   */
+  sampleOptions?: OptionValues;
   /** Overrides the input box placeholder for this direction. */
   placeholder?: Localized;
   /**
