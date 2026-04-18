@@ -7,6 +7,7 @@ export const spec: TextToolSpec = {
       id: "sign",
       label: { tr: "İmzala", en: "Sign" },
       sample: '{"event":"payment.succeeded","id":"evt_123"}',
+      sampleOptions: { secret: "whsec_ornek_anahtar_1234567890" },
       placeholder: { tr: "İmzalanacak mesaj", en: "Message to sign" },
       run: (input, options) =>
         hmac(
