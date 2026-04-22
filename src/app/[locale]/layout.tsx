@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { isLocale, LOCALES, t, type Locale } from "@/i18n";
 import { THEME_SCRIPT } from "@/lib/theme";
+import ServiceWorker from "@/components/ServiceWorker";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import "../globals.css";
@@ -66,11 +67,23 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="flex min-h-dvh flex-col">
+        {/* First in the tab order and invisible until focused: a keyboard
+            visitor should not walk the header to reach the tool. */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:bg-background focus:px-3 focus:py-2 focus:text-sm"
+        >
+          {t(locale, "nav.skipToContent")}
+        </a>
         <SiteHeader locale={locale as Locale} />
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+        <main
+          id="main"
+          className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10"
+        >
           {children}
         </main>
         <SiteFooter locale={locale as Locale} />
+        <ServiceWorker />
       </body>
     </html>
   );
