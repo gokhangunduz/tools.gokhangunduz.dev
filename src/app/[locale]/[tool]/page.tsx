@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Globe } from "lucide-react";
+import { ChevronLeft, Globe } from "lucide-react";
 import { isLocale, LOCALES, pick, t } from "@/i18n";
 import { CATEGORY_BY_ID } from "@/tools/categories";
 import { TOOL_COMPONENTS } from "@/tools/components";
-import { getTool, relatedTools, TOOLS } from "@/tools/registry";
+import {
+  getTool,
+  relatedTools,
+  TOOLS,
+  toolsInCategory,
+} from "@/tools/registry";
+import ToolIcon from "@/components/ToolIcon";
+import FavoriteButton from "@/components/FavoriteButton";
 import VisitTracker from "@/components/VisitTracker";
 
 /**
  * Every tool page, prerendered at build time.
  *
- * The pages are static: the input never leaves the browser, so there is
- * nothing per-request to render, and a static page is what makes the tool
- * usable the moment it paints.
+ * The input never leaves the browser, so there is nothing per-request to
+ * render, and a static page is what makes the tool usable the moment it
+ * paints.
  */
 export function generateStaticParams() {
   return LOCALES.flatMap((locale) =>
@@ -30,15 +37,24 @@ export async function generateMetadata({
   const tool = getTool(toolId);
   if (!isLocale(locale) || !tool) return {};
 
+  const title = pick(locale, tool.name);
+  const description = pick(locale, tool.blurb);
+
   return {
-    title: pick(locale, tool.name),
-    description: pick(locale, tool.blurb),
+    title,
+    description,
     keywords: tool.keywords[locale],
     alternates: {
       canonical: `/${locale}/${tool.id}`,
       languages: Object.fromEntries(
         LOCALES.map((l) => [l, `/${l}/${tool.id}`]),
       ),
+    },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: locale === "tr" ? "tr_TR" : "en_US",
     },
   };
 }
@@ -54,28 +70,47 @@ export default async function ToolPage({
   if (!isLocale(locale) || !tool || !Tool) notFound();
 
   const category = CATEGORY_BY_ID[tool.category];
-  const related = relatedTools(tool);
+  // Explicit relations first, then the rest of the category — a tool with no
+  // `related` still leads somewhere, and the row is never empty.
+  const explicit = relatedTools(tool);
+  const siblings = toolsInCategory(tool.category).filter(
+    (item) =>
+      item.id !== tool.id && !explicit.some((entry) => entry.id === item.id),
+  );
+  const related = [...explicit, ...siblings].slice(0, 6);
 
   return (
     <div className="flex flex-col gap-8">
       <VisitTracker toolId={tool.id} />
 
-      <header className="flex flex-col gap-1.5">
-        <p className="text-xs text-muted-foreground">
+      <header className="flex flex-col gap-2">
+        <Link
+          href={`/${locale}#${category.id}`}
+          className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ChevronLeft className="size-3" />
           {pick(locale, category.name)}
-        </p>
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          {pick(locale, tool.name)}
-        </h1>
+        </Link>
+
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="flex items-center gap-2.5 text-xl font-semibold tracking-tight sm:text-2xl">
+            <ToolIcon
+              name={tool.icon}
+              className="size-5 shrink-0 text-muted-foreground"
+            />
+            {pick(locale, tool.name)}
+          </h1>
+          <FavoriteButton locale={locale} toolId={tool.id} />
+        </div>
+
         <p className="max-w-2xl text-sm text-muted-foreground">
           {pick(locale, tool.blurb)}
         </p>
+
         {tool.network && (
           <p className="mt-1 inline-flex items-center gap-1.5 self-start rounded-md border border-warning/40 bg-warning/5 px-2 py-1 text-xs text-warning">
             <Globe className="size-3.5" />
-            {locale === "tr"
-              ? "Bu araç sorgu için dış bir servise istek atar."
-              : "This tool sends a request to a third-party service."}
+            {t(locale, "tool.networkWarning")}
           </p>
         )}
       </header>
@@ -92,8 +127,9 @@ export default async function ToolPage({
               <li key={item.id}>
                 <Link
                   href={`/${locale}/${item.id}`}
-                  className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
+                  <ToolIcon name={item.icon} className="size-3.5" />
                   {pick(locale, item.name)}
                 </Link>
               </li>
