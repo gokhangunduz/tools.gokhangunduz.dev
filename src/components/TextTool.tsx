@@ -248,6 +248,7 @@ export default function TextTool({
           <Textarea
             ref={inputRef}
             value={input}
+            className="min-h-64 md:min-h-[46vh]"
             onChange={(e) => setInput(e.target.value)}
             placeholder={
               active.placeholder ? pick(locale, active.placeholder) : undefined
@@ -286,7 +287,7 @@ export default function TextTool({
             <p
               role="alert"
               data-tool-error
-              className="min-h-40 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
+              className="min-h-64 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive md:min-h-[46vh]"
             >
               {error}
             </p>
@@ -295,7 +296,10 @@ export default function TextTool({
               value={output}
               readOnly
               placeholder={t(locale, "tool.emptyOutput")}
-              className={cn("bg-muted/40", pending && "opacity-60")}
+              className={cn(
+                "min-h-64 bg-muted/40 md:min-h-[46vh]",
+                pending && "opacity-60",
+              )}
             />
           )}
           {footnote && !error && (
