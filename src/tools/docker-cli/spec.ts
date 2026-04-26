@@ -1,6 +1,7 @@
 import type { ReferenceSpec } from "../reference-tool";
 
 export const spec: ReferenceSpec = {
+  bilingualColumn: 1,
   columns: [
     { tr: "Komut", en: "Command" },
     { tr: "Ne yapar", en: "What it does" },
