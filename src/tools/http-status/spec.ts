@@ -8,6 +8,7 @@ import type { ReferenceSpec } from "../reference-tool";
  * to re-authenticate, whether the request can be repeated as-is.
  */
 export const spec: ReferenceSpec = {
+  bilingualColumn: 2,
   columns: [
     { tr: "Kod", en: "Code" },
     { tr: "Ad", en: "Name" },
