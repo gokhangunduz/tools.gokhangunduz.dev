@@ -1,13 +1,16 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import { pick, t, type Locale } from "@/i18n";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import ToolCard from "@/components/ToolCard";
 import ToolIcon from "@/components/ToolIcon";
 import { CATEGORIES } from "@/tools/categories";
-import { searchTools, TOOLS } from "@/tools/registry";
+import { encodeShared } from "@/lib/share";
+import { detect } from "@/tools/detect";
+import { getTool, searchTools, TOOLS } from "@/tools/registry";
 import type { CategoryId } from "@/tools/types";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +44,16 @@ export default function ToolBrowser({ locale }: { locale: Locale }) {
   }, [matches]);
 
   const searching = deferred.trim().length > 0;
+
+  // What was pasted, if it is a value rather than a search term. This is the
+  // half of "search tools, or paste something" that makes the second clause
+  // true.
+  const detected = useMemo(() => {
+    const found = detect(deferred);
+    if (!found) return null;
+    const tool = getTool(found.toolId);
+    return tool ? { tool, label: found.label } : null;
+  }, [deferred]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -92,6 +105,29 @@ export default function ToolBrowser({ locale }: { locale: Locale }) {
           );
         })}
       </div>
+
+      {detected && (
+        <Link
+          href={`/${locale}/${detected.tool.id}#i=${encodeShared(deferred)}`}
+          className="flex items-center gap-3 rounded-lg border border-info/40 bg-info/5 px-4 py-3 text-sm transition-colors hover:bg-info/10"
+        >
+          <ToolIcon
+            name={detected.tool.icon}
+            className="size-4 shrink-0 text-info"
+          />
+          <span className="min-w-0">
+            <span className="text-muted-foreground">
+              {t(locale, "search.detected")}{" "}
+            </span>
+            <span className="font-medium">{pick(locale, detected.label)}</span>
+            <span className="text-muted-foreground">
+              {" → "}
+              {pick(locale, detected.tool.name)}
+            </span>
+          </span>
+          <ArrowRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
+        </Link>
+      )}
 
       {matches.length === 0 ? (
         <p className="py-16 text-center text-sm text-muted-foreground">
