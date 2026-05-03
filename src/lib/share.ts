@@ -12,7 +12,7 @@
 const MAX_SHARE_BYTES = 4096;
 
 /** Base64url over UTF-8 — `encodeURIComponent` alone triples the length of Turkish text. */
-function encode(value: string): string {
+export function encode(value: string): string {
   const bytes = new TextEncoder().encode(value);
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
@@ -55,6 +55,12 @@ export function writeShared(value: string) {
   const encoded = value ? encode(value) : "";
   url.hash = encoded && encoded.length <= MAX_SHARE_BYTES ? `i=${encoded}` : "";
   window.history.replaceState(null, "", url.toString().replace(/#$/, ""));
+}
+
+/** The fragment a link should carry for this value, or an empty string if it is too long. */
+export function encodeShared(value: string): string {
+  const encoded = encode(value);
+  return encoded.length <= MAX_SHARE_BYTES ? encoded : "";
 }
 
 export function shareable(value: string): boolean {
