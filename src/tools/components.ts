@@ -99,4 +99,12 @@ export const TOOL_COMPONENTS: Record<
   "llm-token": dynamic(() => import("./llm-token/Tool")),
   "json-viewer": dynamic(() => import("./json-viewer/Tool")),
   "markdown-editor": dynamic(() => import("./markdown-editor/Tool")),
+  mojibake: dynamic(() => import("./mojibake/Tool")),
+  "char-inspect": dynamic(() => import("./char-inspect/Tool")),
+  "invisible-chars": dynamic(() => import("./invisible-chars/Tool")),
+  "line-endings": dynamic(() => import("./line-endings/Tool")),
+  gitignore: dynamic(() => import("./gitignore/Tool")),
+  license: dynamic(() => import("./license/Tool")),
+  "conventional-commit": dynamic(() => import("./conventional-commit/Tool")),
+  "readme-badge": dynamic(() => import("./readme-badge/Tool")),
 };
