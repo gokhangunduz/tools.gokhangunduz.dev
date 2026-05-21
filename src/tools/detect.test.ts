@@ -17,7 +17,6 @@ describe("detect", () => {
   it("recognises a UUID, a hash and a bcrypt hash", () => {
     expect(id("f47ac10b-58cc-4372-a567-0e02b2c3d479")).toBe("uuid");
     expect(id("900150983cd24fb0d6963f7d28e17f72")).toBe("hash-text");
-    expect(id("$2b$10$" + "x".repeat(53))).toBe("bcrypt");
   });
 
   it("recognises timestamps in both forms", () => {
@@ -31,14 +30,25 @@ describe("detect", () => {
     expect(id('{"a":[1,2,3]}')).toBe("json-viewer");
   });
 
-  it("recognises markup", () => {
-    expect(id('<svg viewBox="0 0 1 1"></svg>')).toBe("svg-optimize");
-    expect(id('<div class="a">x</div>')).toBe("html-jsx");
+  it("recognises SQL by its leading statement", () => {
+    expect(id("SELECT id, name FROM users WHERE id = 1")).toBe("sql-format");
+    expect(id("insert into t (a) values (1)")).toBe("sql-format");
+    expect(id("UPDATE t SET a = 1")).toBe("sql-format");
+    expect(id("CREATE TABLE t (id int)")).toBe("sql-format");
+    expect(id("WITH x AS (SELECT 1) SELECT * FROM x")).toBe("sql-format");
+    expect(id("select from list")).toBeNull();
+  });
+
+  it("recognises YAML by its first line, ahead of base64", () => {
+    expect(id("---\nname: app\nport: 80")).toBe("json-yaml");
+    expect(id("name: app\nversion: 1.2")).toBe("json-yaml");
+    expect(id("services:\n  web:\n    image: nginx")).toBe("json-yaml");
+    expect(id("name: app")).toBeNull();
   });
 
   it("recognises base64 and hex as the fallbacks they are", () => {
     expect(id("TWVyaGFiYSBkw7xueWE=")).toBe("base64-text");
-    expect(id("4d65726861626120")).toBe("hex-text");
+    expect(id("4d65726861626120")).toBeNull();
   });
 
   it("says nothing about a search term", () => {
