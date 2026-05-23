@@ -2,20 +2,7 @@ import type { IconName } from "./icons";
 import type { Locale, Localized } from "@/i18n";
 
 export type CategoryId =
-  | "encode"
-  | "crypto"
-  | "jwt"
-  | "format"
-  | "convert"
-  | "text"
-  | "validate"
-  | "time"
-  | "number"
-  | "network"
-  | "generate"
-  | "image"
-  | "reference"
-  | "playground";
+  "encode" | "data" | "text" | "crypto" | "time" | "network" | "image";
 
 export type Category = {
   id: CategoryId;
@@ -47,12 +34,14 @@ export type ToolMeta = {
    */
   keywords: Record<Locale, string[]>;
   icon: IconName;
-  /** Slugs shown at the bottom of the page. */
-  related?: string[];
   /**
    * The tool sends a request to a third-party API. Everything else is pure
    * client-side work, and the footer's privacy line depends on that being
    * true, so the few exceptions are marked and labelled on the page.
    */
   network?: boolean;
+  /** The host a network tool sends its query to, named on the page. */
+  networkService?: string;
+  /** Popularity, used only to order tools that match a search equally well. */
+  weight?: number;
 };
