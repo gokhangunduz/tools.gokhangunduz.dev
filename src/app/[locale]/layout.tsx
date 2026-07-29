@@ -7,7 +7,10 @@ import { THEME_SCRIPT } from "@/lib/theme";
 import ServiceWorker from "@/components/ServiceWorker";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import Sidebar, { SidebarRail } from "@/components/Sidebar";
 import "../globals.css";
+
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -40,8 +43,8 @@ export const viewport: Viewport = {
   // Two entries so the browser chrome follows the palette rather than sitting
   // white above a dark page.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
   ],
 };
 
@@ -66,7 +69,7 @@ export default async function LocaleLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="flex min-h-dvh flex-col">
+      <body className="flex h-dvh flex-col overflow-hidden">
         {/* First in the tab order and invisible until focused: a keyboard
             visitor should not walk the header to reach the tool. */}
         <a
@@ -76,13 +79,22 @@ export default async function LocaleLayout({
           {t(locale, "nav.skipToContent")}
         </a>
         <SiteHeader locale={locale as Locale} />
-        <main
-          id="main"
-          className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10"
-        >
-          {children}
-        </main>
-        <SiteFooter locale={locale as Locale} />
+        <div className="flex min-h-0 flex-1">
+          <SidebarRail>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <Sidebar locale={locale as Locale} />
+            </div>
+            <SiteFooter locale={locale as Locale} />
+          </SidebarRail>
+          <main
+            id="main"
+            className="flex min-w-0 flex-1 flex-col overflow-y-auto"
+          >
+            <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5">
+              {children}
+            </div>
+          </main>
+        </div>
         <ServiceWorker />
       </body>
     </html>
