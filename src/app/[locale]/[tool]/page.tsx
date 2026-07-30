@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Globe } from "lucide-react";
+import { Globe } from "lucide-react";
 import { isLocale, LOCALES, pick, t } from "@/i18n";
 import { CATEGORY_BY_ID } from "@/tools/categories";
 import { TOOL_COMPONENTS } from "@/tools/components";
-import {
-  getTool,
-  relatedTools,
-  TOOLS,
-  toolsInCategory,
-} from "@/tools/registry";
-import ToolIcon from "@/components/ToolIcon";
+import { getTool, TOOLS } from "@/tools/registry";
+import { IconBadge } from "@/components/ToolIcon";
 import FavoriteButton from "@/components/FavoriteButton";
 import VisitTracker from "@/components/VisitTracker";
 
@@ -22,6 +17,8 @@ import VisitTracker from "@/components/VisitTracker";
  * render, and a static page is what makes the tool usable the moment it
  * paints.
  */
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return LOCALES.flatMap((locale) =>
     TOOLS.map((tool) => ({ locale, tool: tool.id })),
@@ -70,73 +67,48 @@ export default async function ToolPage({
   if (!isLocale(locale) || !tool || !Tool) notFound();
 
   const category = CATEGORY_BY_ID[tool.category];
-  // Explicit relations first, then the rest of the category — a tool with no
-  // `related` still leads somewhere, and the row is never empty.
-  const explicit = relatedTools(tool);
-  const siblings = toolsInCategory(tool.category).filter(
-    (item) =>
-      item.id !== tool.id && !explicit.some((entry) => entry.id === item.id),
-  );
-  const related = [...explicit, ...siblings].slice(0, 6);
+  const service = tool.networkService ?? null;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className={`flex min-h-0 flex-1 flex-col gap-4 cat-${tool.category}`}>
       <VisitTracker toolId={tool.id} />
 
-      <header className="flex flex-col gap-2">
-        <Link
-          href={`/${locale}#${category.id}`}
-          className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ChevronLeft className="size-3" />
-          {pick(locale, category.name)}
-        </Link>
-
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="flex items-center gap-2.5 text-xl font-semibold tracking-tight sm:text-2xl">
-            <ToolIcon
-              name={tool.icon}
-              className="size-5 shrink-0 text-muted-foreground"
-            />
+      <header className="flex shrink-0 items-center gap-3">
+        <IconBadge name={tool.icon} size="lg" />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <Link
+            href={`/${locale}#${category.id}`}
+            className="w-fit text-xs font-medium text-tint transition-opacity hover:opacity-80"
+          >
+            {pick(locale, category.name)}
+          </Link>
+          <h1 className="truncate text-lg font-semibold tracking-tight sm:text-xl">
             {pick(locale, tool.name)}
           </h1>
-          <FavoriteButton locale={locale} toolId={tool.id} />
-        </div>
-
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          {pick(locale, tool.blurb)}
-        </p>
-
-        {tool.network && (
-          <p className="mt-1 inline-flex items-center gap-1.5 self-start rounded-md border border-warning/40 bg-warning/5 px-2 py-1 text-xs text-warning">
-            <Globe className="size-3.5" />
-            {t(locale, "tool.networkWarning")}
+          <p className="line-clamp-2 text-xs text-muted-foreground sm:line-clamp-1 sm:text-sm">
+            {pick(locale, tool.blurb)}
           </p>
+        </div>
+        {tool.network && (
+          <span
+            title={t(locale, "tool.networkWarning")}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-warning/40 bg-warning/5 px-2 py-1 text-xs text-warning"
+          >
+            <Globe className="size-3.5" />
+            <span className="md:hidden">
+              {service ?? t(locale, "tool.networkTiny")}
+            </span>
+            <span className="hidden md:inline">
+              {service
+                ? t(locale, "tool.networkService", { service })
+                : t(locale, "tool.networkShort")}
+            </span>
+          </span>
         )}
+        <FavoriteButton locale={locale} toolId={tool.id} />
       </header>
 
       <Tool locale={locale} />
-
-      {related.length > 0 && (
-        <section className="flex flex-col gap-2 border-t pt-6">
-          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {t(locale, "tool.related")}
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {related.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={`/${locale}/${item.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                >
-                  <ToolIcon name={item.icon} className="size-3.5" />
-                  {pick(locale, item.name)}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }
