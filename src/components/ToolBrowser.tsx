@@ -1,76 +1,179 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import { ArrowRight, Search, X } from "lucide-react";
-import { pick, t, type Locale } from "@/i18n";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ClipboardPaste, Search, X } from "lucide-react";
+import { pick, t, type Locale, type Localized } from "@/i18n";
 import { Input } from "@/components/ui/input";
+import PinnedTools from "@/components/PinnedTools";
+import { HOME_SEARCH_ID } from "@/components/SiteHeader";
 import ToolCard from "@/components/ToolCard";
-import ToolIcon from "@/components/ToolIcon";
+import ToolGrid from "@/components/ToolGrid";
 import { CATEGORIES } from "@/tools/categories";
 import { encodeShared } from "@/lib/share";
 import { detect } from "@/tools/detect";
 import { getTool, searchTools, TOOLS } from "@/tools/registry";
-import type { CategoryId } from "@/tools/types";
-import { cn } from "@/lib/utils";
+import type { ToolMeta } from "@/tools/types";
 
-/**
- * The home page's index: a search box, category filters, and the grid.
- *
- * With eighty tools, a page that is only fourteen stacked sections is a page
- * nobody reaches the bottom of. Typing filters everything at once, which is
- * how most visits will end — and the filter runs against both languages, so
- * a Turkish interface still finds a tool someone knows by its English name.
- */
+const COPY = {
+  pasted: {
+    tr: "yapıştırılan içerik ({count} satır)",
+    en: "pasted content ({count} lines)",
+  },
+  clearSearch: { tr: "Aramayı temizle", en: "Clear search" },
+} satisfies Record<string, Localized>;
+
+const LISTBOX_ID = "home-results";
+
+type Result = { tool: ToolMeta; href: string; note?: React.ReactNode };
+
+function resultsFor(
+  query: string,
+  pasted: string | null,
+  locale: Locale,
+): Result[] {
+  const value = pasted ?? query;
+  const found = detect(value);
+  const detectedTool = found ? getTool(found.toolId) : undefined;
+  const matches = pasted || !query.trim() ? [] : searchTools(query, locale);
+
+  const results: Result[] = matches
+    .filter((tool) => tool.id !== detectedTool?.id)
+    .map((tool) => ({ tool, href: `/${locale}/${tool.id}` }));
+
+  if (found && detectedTool) {
+    const encoded = encodeShared(value.trim());
+    results.unshift({
+      tool: detectedTool,
+      href: `/${locale}/${detectedTool.id}${encoded ? `#i=${encoded}` : ""}`,
+      note: (
+        <>
+          {t(locale, "search.detected")}{" "}
+          <span className="font-medium text-foreground">
+            {pick(locale, found.label)}
+          </span>
+        </>
+      ),
+    });
+  }
+  return results;
+}
+
 export default function ToolBrowser({ locale }: { locale: Locale }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<CategoryId | null>(null);
-  // The list is redrawn on every keystroke; deferring it keeps the input
-  // itself responsive when the result set is large.
+  const [pasted, setPasted] = useState<string | null>(null);
   const deferred = useDeferredValue(query);
+  const [cursor, setCursor] = useState({ key: "", index: 0 });
 
-  const matches = useMemo(() => {
-    const found = deferred.trim() ? searchTools(deferred, locale) : TOOLS;
-    return category
-      ? found.filter((tool) => tool.category === category)
-      : found;
-  }, [deferred, locale, category]);
+  const searching = pasted !== null || deferred.trim().length > 0;
+  const key = pasted ?? query;
 
-  const grouped = useMemo(() => {
-    return CATEGORIES.map((entry) => ({
-      category: entry,
-      tools: matches.filter((tool) => tool.category === entry.id),
-    })).filter((group) => group.tools.length > 0);
-  }, [matches]);
+  const results = useMemo(
+    () => resultsFor(deferred, pasted, locale),
+    [deferred, pasted, locale],
+  );
 
-  const searching = deferred.trim().length > 0;
+  const groups = useMemo(
+    () =>
+      CATEGORIES.map((category) => ({
+        category,
+        tools: TOOLS.filter((tool) => tool.category === category.id),
+      })).filter((group) => group.tools.length > 0),
+    [],
+  );
 
-  // What was pasted, if it is a value rather than a search term. This is the
-  // half of "search tools, or paste something" that makes the second clause
-  // true.
-  const detected = useMemo(() => {
-    const found = detect(deferred);
-    if (!found) return null;
-    const tool = getTool(found.toolId);
-    return tool ? { tool, label: found.label } : null;
-  }, [deferred]);
+  const active =
+    cursor.key === key ? Math.min(cursor.index, results.length - 1) : 0;
+
+  function clear() {
+    setQuery("");
+    setPasted(null);
+  }
+
+  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      if (query || pasted !== null) {
+        event.preventDefault();
+        clear();
+      }
+      return;
+    }
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (results.length === 0) return;
+      event.preventDefault();
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      const next = (active + step + results.length) % results.length;
+      setCursor({ key, index: next });
+      document
+        .getElementById(optionId(results[next].tool))
+        ?.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    if (event.key === "Enter") {
+      const current =
+        deferred === query
+          ? results[active]
+          : resultsFor(query, pasted, locale)[0];
+      if (!current) return;
+      event.preventDefault();
+      router.push(current.href);
+    }
+  }
+
+  function onPaste(event: React.ClipboardEvent<HTMLInputElement>) {
+    const text = event.clipboardData.getData("text");
+    if (!text.includes("\n") && text.length <= 200) return;
+    event.preventDefault();
+    setPasted(text);
+    setQuery("");
+  }
+
+  const pastedLines = pasted?.replace(/\s+$/, "").split(/\r?\n/).length ?? 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        {pasted !== null && (
+          <span className="pointer-events-none absolute left-11 top-1/2 inline-flex max-w-[calc(100%-6rem)] -translate-y-1/2 items-center gap-1.5 rounded-md border bg-muted px-2 py-1 text-xs text-muted-foreground">
+            <ClipboardPaste className="size-3.5 shrink-0" />
+            <span className="truncate tabular">
+              {pick(locale, COPY.pasted).replace(
+                "{count}",
+                String(pastedLines),
+              )}
+            </span>
+          </span>
+        )}
         <Input
+          id={HOME_SEARCH_ID}
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={t(locale, "search.placeholder")}
-          className="h-12 rounded-xl pl-10 pr-10 text-base"
+          onChange={(event) => {
+            setPasted(null);
+            setQuery(event.target.value);
+          }}
+          onKeyDown={onKeyDown}
+          onPaste={onPaste}
+          placeholder={pasted === null ? t(locale, "search.placeholder") : ""}
+          className="h-12 rounded-xl bg-card pl-11 pr-10 text-base shadow-soft focus-visible:border-tint/50 focus-visible:ring-4 focus-visible:ring-tint/10"
           autoFocus
+          autoComplete="off"
+          spellCheck={false}
+          role="combobox"
+          aria-expanded={searching}
+          aria-controls={LISTBOX_ID}
+          aria-activedescendant={
+            searching && results[active]
+              ? optionId(results[active].tool)
+              : undefined
+          }
           aria-label={t(locale, "nav.openPalette")}
         />
-        {query && (
+        {(query || pasted !== null) && (
           <button
             type="button"
-            onClick={() => setQuery("")}
+            onClick={clear}
             aria-label={t(locale, "tool.clear")}
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
@@ -79,135 +182,57 @@ export default function ToolBrowser({ locale }: { locale: Locale }) {
         )}
       </div>
 
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
-        <Chip
-          active={category === null}
-          onClick={() => setCategory(null)}
-          label={t(locale, "nav.allTools")}
-          count={TOOLS.length}
-        />
-        {CATEGORIES.map((entry) => {
-          const count = TOOLS.filter(
-            (tool) => tool.category === entry.id,
-          ).length;
-          if (count === 0) return null;
-          return (
-            <Chip
-              key={entry.id}
-              active={category === entry.id}
-              onClick={() =>
-                setCategory(category === entry.id ? null : entry.id)
-              }
-              label={pick(locale, entry.name)}
-              count={count}
-              icon={<ToolIcon name={entry.icon} className="size-3.5" />}
-            />
-          );
-        })}
-      </div>
-
-      {detected && (
-        <Link
-          href={`/${locale}/${detected.tool.id}#i=${encodeShared(deferred)}`}
-          className="flex items-center gap-3 rounded-lg border border-info/40 bg-info/5 px-4 py-3 text-sm transition-colors hover:bg-info/10"
-        >
-          <ToolIcon
-            name={detected.tool.icon}
-            className="size-4 shrink-0 text-info"
-          />
-          <span className="min-w-0">
-            <span className="text-muted-foreground">
-              {t(locale, "search.detected")}{" "}
-            </span>
-            <span className="font-medium">{pick(locale, detected.label)}</span>
-            <span className="text-muted-foreground">
-              {" → "}
-              {pick(locale, detected.tool.name)}
-            </span>
-          </span>
-          <ArrowRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
-        </Link>
+      {!searching && (
+        <div className="flex min-h-7 items-center gap-4">
+          <div className="min-w-0 flex-1">
+            <PinnedTools locale={locale} fallback={null} />
+          </div>
+        </div>
       )}
 
-      {matches.length === 0 ? (
-        <p className="py-16 text-center text-sm text-muted-foreground">
-          {t(locale, "search.empty")}
-        </p>
-      ) : searching || category ? (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {t(locale, "nav.toolCount", { count: matches.length })}
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {matches.map((tool) => (
-              <ToolCard key={tool.id} locale={locale} tool={tool} />
-            ))}
-          </div>
-        </section>
-      ) : (
-        grouped.map(({ category: entry, tools }) => (
-          <section
-            key={entry.id}
-            id={entry.id}
-            className="flex scroll-mt-20 flex-col gap-3"
+      {!searching ? (
+        <ToolGrid locale={locale} groups={groups} />
+      ) : results.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-16 text-sm text-muted-foreground">
+          <p>{t(locale, "search.empty")}</p>
+          <button
+            type="button"
+            onClick={clear}
+            className="rounded-md border bg-card px-3 py-1.5 text-foreground transition-colors hover:bg-accent"
           >
-            <h2 className="flex items-center gap-2 text-sm font-medium">
-              <ToolIcon
-                name={entry.icon}
-                className="size-4 text-muted-foreground"
+            {pick(locale, COPY.clearSearch)}
+          </button>
+        </div>
+      ) : (
+        <section className="flex flex-col gap-1 rounded-xl border bg-card p-2 shadow-soft">
+          <h2 className="px-2 pt-1 text-xs font-medium text-muted-foreground tabular">
+            {t(locale, "nav.toolCount", { count: results.length })}
+          </h2>
+          <ul
+            id={LISTBOX_ID}
+            role="listbox"
+            aria-label={t(locale, "nav.allTools")}
+            className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {results.map((result, index) => (
+              <ToolCard
+                key={result.tool.id}
+                id={optionId(result.tool)}
+                locale={locale}
+                tool={result.tool}
+                href={result.href}
+                note={result.note}
+                active={index === active}
+                option
               />
-              {pick(locale, entry.name)}
-              <span className="text-xs font-normal text-muted-foreground tabular">
-                {tools.length}
-              </span>
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {tools.map((tool) => (
-                <ToolCard key={tool.id} locale={locale} tool={tool} />
-              ))}
-            </div>
-          </section>
-        ))
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );
 }
 
-function Chip({
-  active,
-  onClick,
-  label,
-  count,
-  icon,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  count: number;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-        active
-          ? "border-transparent bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
-      )}
-    >
-      {icon}
-      {label}
-      <span
-        className={cn(
-          "tabular",
-          active ? "opacity-70" : "text-muted-foreground/70",
-        )}
-      >
-        {count}
-      </span>
-    </button>
-  );
+function optionId(tool: ToolMeta): string {
+  return `home-option-${tool.id}`;
 }
