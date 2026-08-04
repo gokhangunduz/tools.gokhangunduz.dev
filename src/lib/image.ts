@@ -87,3 +87,20 @@ export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
+
+/** The pixel size of an image the browser can display, or null when it cannot. */
+export function naturalSize(
+  src: string,
+): Promise<{ width: number; height: number } | null> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () =>
+      resolve(
+        image.naturalWidth && image.naturalHeight
+          ? { width: image.naturalWidth, height: image.naturalHeight }
+          : null,
+      );
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+}
