@@ -3,7 +3,7 @@
     "name": "tools.gokhangunduz.dev",
     "short": "tools",
     "tagline": "Geliştiriciler için hızlı, reklamsız, tarayıcıda çalışan araçlar",
-    "description": "Base64, JWT, hash, JSON, cron ve onlarca araç. Girdiğiniz hiçbir şey sunucuya gitmez."
+    "description": "Base64, JWT, hash, JSON, cron ve onlarca araç. Girdiğin hiçbir şey sunucuya gitmez."
   },
   "search": {
     "placeholder": "Araç ara veya bir şey yapıştır…",
@@ -17,7 +17,9 @@
     "categories": "Kategoriler",
     "openPalette": "Araç ara",
     "toolCount": "{count} araç",
-    "skipToContent": "İçeriğe geç"
+    "skipToContent": "İçeriğe geç",
+    "menu": "Menü",
+    "close": "Kapat"
   },
   "tool": {
     "input": "Girdi",
@@ -27,23 +29,47 @@
     "copied": "Kopyalandı",
     "clear": "Temizle",
     "paste": "Yapıştır",
-    "sample": "Örnek doldur",
+    "sample": "Örnek",
     "download": "İndir",
-    "share": "Bağlantıyı kopyala",
-    "shared": "Bağlantı kopyalandı",
+    "share": "Linki kopyala",
+    "shared": "Link kopyalandı",
     "swap": "Yönü değiştir",
-    "related": "İlgili araçlar",
     "emptyOutput": "Çıktı burada görünecek",
     "favorite": "Favorilere ekle",
     "unfavorite": "Favorilerden çıkar",
     "generate": "Üret",
-    "networkWarning": "Bu araç sorgu için dış bir servise istek atar; girdiğin değer o servise gider."
+    "networkWarning": "Bu araç sorgu için dış bir servise istek atar; girdiğin değer o servise gider.",
+    "chars": "karakter",
+    "preview": "Önizleme",
+    "networkShort": "Dış servise istek atar",
+    "inputPlaceholder": "Metni yaz ya da yapıştır",
+    "useOutput": "Çıktıyı girdi yap",
+    "openFile": "Dosya aç",
+    "undo": "Geri al",
+    "lines": "satır",
+    "bytes": "bayt",
+    "dropFile": "Dosyayı bırak",
+    "fileType": "Bu araç {types} dosyası açar.",
+    "fileRead": "Dosya okunamadı.",
+    "showValue": "Göster",
+    "hideValue": "Gizle",
+    "secretNotShared": "{name} linke eklenmez",
+    "submit": "Sorgula",
+    "pending": "Sorgulanıyor…",
+    "working": "Hesaplanıyor…",
+    "goTo": "Satır {line}:{column}",
+    "goToTitle": "Girdide göster",
+    "networkTiny": "Harici servis",
+    "networkService": "{service} adresine gider",
+    "unexpectedError": "Beklenmeyen bir hata oluştu; girdiyi kontrol edip tekrar dene."
   },
   "home": {
     "favorites": "Favoriler",
     "recent": "Son kullanılanlar",
     "noFavorites": "Bir aracın yanındaki yıldıza basarsan burada durur.",
-    "promise": "Hiçbir şey sunucuya gitmez"
+    "promise": "Hiçbir şey sunucuya gitmez",
+    "title": "Geliştirici araçları",
+    "subtitle": "Encode, JSON, hash, zaman, ağ ve görsel araçları. Hepsi tarayıcında çalışır; girdiğin hiçbir şey sunucuya gitmez."
   },
   "theme": {
     "label": "Tema",
@@ -64,18 +90,9 @@
   "footer": {
     "privacy": "Her şey tarayıcında çalışır; girdiğin veri sunucuya gitmez."
   },
-  "reference": {
-    "filter": "Tabloda ara…",
-    "count": "{shown} / {total} satır"
-  },
   "file": {
     "choose": "Dosya seç",
     "drop": "Dosyayı buraya bırak ya da tıkla",
     "working": "İşleniyor…"
-  },
-  "exif": {
-    "saveEdited": "Düzenlenmiş hali indir",
-    "stripAll": "Tüm EXIF'i sil ve indir",
-    "note": "Fotoğraf hiçbir yere yüklenmez; okuma da yazma da bu sekmede olur."
   }
 }
