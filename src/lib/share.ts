@@ -35,25 +35,79 @@ function decode(value: string): string | null {
   }
 }
 
+export type SharedState = {
+  input: string;
+  direction?: string;
+  options?: Record<string, unknown>;
+};
+
 /** Only the browser's own fragment changes matter; our own writes replace it. */
 export function subscribeShared(onChange: () => void) {
   window.addEventListener("hashchange", onChange);
   return () => window.removeEventListener("hashchange", onChange);
 }
 
-export function readShared(): string | null {
-  if (typeof window === "undefined") return null;
-  const hash = window.location.hash.slice(1);
-  if (!hash.startsWith("i=")) return null;
-  return decode(hash.slice(2));
+/** The raw fragment, a stable snapshot for `useSyncExternalStore`. */
+export function readSharedHash(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.hash.slice(1);
+}
+
+/**
+ * `i=` carries the input alone (links from the search box); `s=` carries
+ * `{ i, d, o }`: the input, the direction and the options that differ.
+ */
+export function parseShared(hash: string): SharedState | null {
+  if (hash.startsWith("i=")) {
+    const input = decode(hash.slice(2));
+    return input === null ? null : { input };
+  }
+  if (!hash.startsWith("s=")) return null;
+  const json = decode(hash.slice(2));
+  if (json === null) return null;
+  try {
+    const value: unknown = JSON.parse(json);
+    if (!value || typeof value !== "object") return null;
+    const { i, d, o } = value as Record<string, unknown>;
+    if (typeof i !== "string") return null;
+    return {
+      input: i,
+      direction: typeof d === "string" ? d : undefined,
+      options:
+        o && typeof o === "object" && !Array.isArray(o)
+          ? (o as Record<string, unknown>)
+          : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function readShared(): SharedState | null {
+  return parseShared(readSharedHash());
+}
+
+/** The fragment for a state, without the `#`, or "" when it is empty or too long. */
+export function formatShared({
+  input,
+  direction,
+  options,
+}: SharedState): string {
+  if (!input) return "";
+  const state: Record<string, unknown> = { i: input };
+  if (direction) state.d = direction;
+  if (options && Object.keys(options).length > 0) state.o = options;
+  const encoded = encode(JSON.stringify(state));
+  return encoded.length <= MAX_SHARE_BYTES ? `s=${encoded}` : "";
 }
 
 /** Replaces the fragment without adding a history entry, so Back still leaves the tool. */
-export function writeShared(value: string) {
+export function writeShared(state: SharedState) {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
-  const encoded = value ? encode(value) : "";
-  url.hash = encoded && encoded.length <= MAX_SHARE_BYTES ? `i=${encoded}` : "";
+  const fragment = formatShared(state);
+  if (url.hash.slice(1) === fragment) return;
+  url.hash = fragment;
   window.history.replaceState(null, "", url.toString().replace(/#$/, ""));
 }
 
