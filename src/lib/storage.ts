@@ -108,3 +108,42 @@ export function noteVisit(id: string) {
   const current = read(RECENT_KEY).filter((v) => v !== id);
   write(RECENT_KEY, [id, ...current].slice(0, RECENT_LIMIT));
 }
+
+const VALUES_PREFIX = "tools-values:";
+
+/** The raw stored option values of a tool, or null. A string so it can be a stable snapshot. */
+export function readToolValues(toolId: string): string | null {
+  try {
+    return localStorage.getItem(VALUES_PREFIX + toolId);
+  } catch {
+    return null;
+  }
+}
+
+export function parseToolValues(
+  raw: string | null,
+): Record<string, unknown> | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Remembers a tool's settings in this browser; an empty set forgets them. */
+export function writeToolValues(
+  toolId: string,
+  values: Record<string, unknown>,
+) {
+  try {
+    if (Object.keys(values).length === 0) {
+      localStorage.removeItem(VALUES_PREFIX + toolId);
+    } else {
+      localStorage.setItem(VALUES_PREFIX + toolId, JSON.stringify(values));
+    }
+  } catch {}
+}
