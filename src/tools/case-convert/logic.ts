@@ -1,13 +1,52 @@
+const LETTERS: Record<string, string> = {
+  ç: "c",
+  Ç: "C",
+  ğ: "g",
+  Ğ: "G",
+  ı: "i",
+  İ: "I",
+  ö: "o",
+  Ö: "O",
+  ş: "s",
+  Ş: "S",
+  ü: "u",
+  Ü: "U",
+  ß: "ss",
+  ẞ: "SS",
+  æ: "ae",
+  Æ: "AE",
+  ø: "o",
+  Ø: "O",
+  ł: "l",
+  Ł: "L",
+  đ: "d",
+  Đ: "D",
+  œ: "oe",
+  Œ: "OE",
+  þ: "th",
+  Þ: "TH",
+};
+
+const MAPPED = new RegExp(`[${Object.keys(LETTERS).join("")}]`, "g");
+
+/** Latin letters without their accents: "Işık Çağrı" → "Isik Cagri", "Straße" → "Strasse". */
+export function transliterate(value: string): string {
+  return value
+    .replace(MAPPED, (character) => LETTERS[character])
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
 /**
  * The naming conventions, with Turkish casing done properly.
  *
  * `"I".toLowerCase()` is "i" in every locale except Turkish, where it is "ı" —
- * and `"i".toUpperCase()` is "İ". A converter that ignores that turns "IŞIK"
- * into "isik" and "İstanbul" into "istanbul", which is the difference between
- * a slug that reads and one that does not. Every case change here names the
- * locale, and the Turkish rules are the default because this is a Turkish
- * site; the English rules stay available for identifiers, where "I" must stay
- * "i" or the code does not compile.
+ * and `"i".toUpperCase()` is "İ". Prose styles (BÜYÜK, küçük, Title,
+ * Sentence) follow the Turkish rules by default because this is a Turkish
+ * site. Identifier styles always use the English rules: `user_id` has to
+ * become `userId`, never `userİd`, or the code does not compile.
+ *
+ * Every style works line by line, so a pasted list converts as a list.
  */
 export type Style =
   | "camel"
@@ -20,73 +59,96 @@ export type Style =
   | "upper"
   | "lower";
 
+export const CODE_STYLES: readonly Style[] = [
+  "camel",
+  "pascal",
+  "snake",
+  "kebab",
+  "constant",
+];
+
 export function convertCase(
   input: string,
   style: Style,
   turkish: boolean,
+  ascii = false,
 ): string {
   if (!input) return "";
   const locale = turkish ? "tr" : "en";
+  const code = CODE_STYLES.includes(style);
 
-  if (style === "upper") return input.toLocaleUpperCase(locale);
-  if (style === "lower") return input.toLocaleLowerCase(locale);
+  return input
+    .split(/\r?\n/)
+    .map((line) => {
+      if (!line.trim()) return "";
+      if (code) return codeCase(ascii ? transliterate(line) : line, style);
+      if (style === "upper") return line.toLocaleUpperCase(locale);
+      if (style === "lower") return line.toLocaleLowerCase(locale);
+      if (style === "sentence") return sentenceCase(line, locale);
+      return titleCase(line, locale);
+    })
+    .join("\n");
+}
 
-  // Sentences and titles are per line, so a paragraph keeps its shape.
-  if (style === "sentence" || style === "title") {
-    return input
-      .split("\n")
-      .map((line) =>
-        style === "sentence"
-          ? sentenceCase(line, locale)
-          : titleCase(line, locale),
-      )
-      .join("\n");
-  }
-
-  const words = splitWords(input);
-  if (words.length === 0) return "";
-
+function codeCase(line: string, style: Style): string {
+  const words = splitWords(line);
   switch (style) {
     case "camel":
       return words
-        .map((word, index) =>
-          index === 0
-            ? word.toLocaleLowerCase(locale)
-            : capitalize(word, locale),
-        )
+        .map((word, index) => (index === 0 ? lower(word) : capitalize(word)))
         .join("");
     case "pascal":
-      return words.map((word) => capitalize(word, locale)).join("");
+      return words.map(capitalize).join("");
     case "snake":
-      return words.map((word) => word.toLocaleLowerCase(locale)).join("_");
+      return words.map(lower).join("_");
     case "kebab":
-      return words.map((word) => word.toLocaleLowerCase(locale)).join("-");
-    case "constant":
-      return words.map((word) => word.toLocaleUpperCase(locale)).join("_");
+      return words.map(lower).join("-");
+    default:
+      return words.map((word) => word.toLocaleUpperCase("en")).join("_");
   }
 }
 
-/** Splits on separators and on the camelCase humps. */
+// English lowercasing turns "İ" into "i" plus a combining dot; plain "i" is what an identifier wants.
+function lower(word: string): string {
+  return word.replace(/İ/g, "i").toLocaleLowerCase("en");
+}
+
+function capitalize(word: string): string {
+  return word.slice(0, 1).toLocaleUpperCase("en") + lower(word.slice(1));
+}
+
+/** Splits on separators and on the humps: "getHTTPResponse" → get, HTTP, Response. */
 export function splitWords(input: string): string[] {
   return input
-    .replace(/([a-zçğıöşü0-9])([A-ZÇĞİÖŞÜ])/g, "$1 $2")
-    .split(/[^A-Za-zÇĞİÖŞÜçğıöşü0-9]+/)
+    .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, "$1 $2")
+    .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, "$1 $2")
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
     .filter(Boolean);
 }
 
-function capitalize(word: string, locale: string): string {
-  return (
-    word.slice(0, 1).toLocaleUpperCase(locale) +
-    word.slice(1).toLocaleLowerCase(locale)
-  );
+/** An acronym such as API or JSON, which a title or a sentence keeps as written. */
+function isAcronym(word: string): boolean {
+  const letters = word.replace(/[^\p{L}]/gu, "");
+  return letters.length >= 2 && !/\p{Ll}/u.test(letters);
+}
+
+/** A line that is all capitals is shouting, not a row of acronyms. */
+function keepsAcronyms(line: string): boolean {
+  return /\p{Ll}/u.test(line);
 }
 
 function sentenceCase(line: string, locale: string): string {
-  const lower = line.toLocaleLowerCase(locale);
-  return lower.replace(
-    /^(\s*)(\p{L})/u,
-    (_, space: string, letter: string) =>
-      space + letter.toLocaleUpperCase(locale),
+  const keep = keepsAcronyms(line);
+  const lowered = line
+    .split(/(\s+)/)
+    .map((part) =>
+      keep && isAcronym(part) ? part : part.toLocaleLowerCase(locale),
+    )
+    .join("");
+  return lowered.replace(
+    /^(\P{L}*)(\p{L})/u,
+    (_, before: string, letter: string) =>
+      before + letter.toLocaleUpperCase(locale),
   );
 }
 
@@ -112,13 +174,18 @@ const MINOR = new Set([
 ]);
 
 function titleCase(line: string, locale: string): string {
+  const keep = keepsAcronyms(line);
   return line
-    .toLocaleLowerCase(locale)
     .split(/(\s+)/)
     .map((part, index) => {
       if (!part.trim()) return part;
-      if (index > 0 && MINOR.has(part)) return part;
-      return capitalize(part, locale);
+      if (keep && isAcronym(part)) return part;
+      const word = part.toLocaleLowerCase(locale);
+      if (index > 0 && MINOR.has(word)) return word;
+      return (
+        word.slice(0, 1).toLocaleUpperCase(locale) +
+        word.slice(1).toLocaleLowerCase(locale)
+      );
     })
     .join("");
 }
