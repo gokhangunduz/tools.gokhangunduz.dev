@@ -13,5 +13,4 @@ export const meta: ToolMeta = {
     tr: ["cron", "crontab", "zamanlama", "schedule", "görev", "açıkla"],
     en: ["cron", "crontab", "schedule", "job", "explain", "next run"],
   },
-  related: ["timestamp", "duration"],
 };
