@@ -3,7 +3,7 @@ import type { ToolMeta } from "../types";
 export const meta: ToolMeta = {
   id: "exif",
   category: "image",
-  icon: "image",
+  icon: "camera",
   name: { tr: "EXIF düzenle", en: "EXIF editor" },
   blurb: {
     tr: "JPEG'in EXIF alanlarını okur, düzenler ve geri yazar; konum varsa uyarır, tek tuşla hepsini siler.",
@@ -31,5 +31,4 @@ export const meta: ToolMeta = {
       "jpeg",
     ],
   },
-  related: ["image-convert", "image-base64"],
 };
