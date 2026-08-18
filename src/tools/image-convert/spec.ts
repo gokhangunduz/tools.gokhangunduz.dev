@@ -1,75 +1,134 @@
-import { decode, encode, formatBytes } from "@/lib/image";
+import { decode } from "@/lib/image";
 import type { FileToolSpec } from "../file-tool";
+import {
+  encodeImage,
+  FORMATS,
+  formatOf,
+  heicError,
+  isHeic,
+  parseColor,
+  parseLimit,
+  resultNote,
+  unsupportedFormat,
+  type Fit,
+} from "./logic";
 
 /**
  * Format conversion and downscaling in one tool, because they are the same
  * decision: making an image smaller for the web.
+ *
+ * `supported` is what the browser's canvas can write, probed on mount; until
+ * then every format is offered and a failed one is reported by name.
  */
-export const spec: FileToolSpec = {
-  accept: "image/*",
-  options: [
-    {
-      kind: "select",
-      id: "format",
-      label: { tr: "Biçim", en: "Format" },
-      default: "image/webp",
-      choices: [
-        { value: "image/webp", label: { tr: "WebP", en: "WebP" } },
-        { value: "image/jpeg", label: { tr: "JPEG", en: "JPEG" } },
-        { value: "image/png", label: { tr: "PNG", en: "PNG" } },
-        { value: "image/avif", label: { tr: "AVIF", en: "AVIF" } },
-      ],
-    },
-    {
-      kind: "select",
-      id: "quality",
-      label: { tr: "Kalite", en: "Quality" },
-      default: "0.8",
-      choices: ["0.5", "0.65", "0.8", "0.9", "1"].map((value) => ({
-        value,
-        label: {
-          tr: `%${Math.round(Number(value) * 100)}`,
-          en: `${Math.round(Number(value) * 100)}%`,
-        },
-      })),
-    },
-    {
-      kind: "select",
-      id: "maxWidth",
-      label: { tr: "En fazla genişlik", en: "Max width" },
-      default: "0",
-      choices: ["0", "640", "1024", "1600", "2048"].map((value) => ({
-        value,
-        label: {
-          tr: value === "0" ? "değiştirme" : `${value}px`,
-          en: value === "0" ? "keep" : `${value}px`,
-        },
-      })),
-    },
-  ],
-  run: async (file, options) => {
-    const bitmap = await decode(file);
-    const type = String(options.format);
-    const maxWidth = Number(options.maxWidth) || null;
-
-    const { blob, width, height } = await encode(
-      bitmap,
-      type,
-      Number(options.quality),
-      maxWidth,
-    );
-    bitmap.close();
-
-    const extension = type.split("/")[1];
-    const saving = Math.round((1 - blob.size / file.size) * 100);
-
-    return {
-      blob,
-      filename: `${file.name.replace(/\.[^.]+$/, "")}.${extension}`,
-      note: {
-        tr: `${formatBytes(file.size)} → ${formatBytes(blob.size)} (${saving >= 0 ? "-" : "+"}%${Math.abs(saving)}) · ${width}×${height}`,
-        en: `${formatBytes(file.size)} → ${formatBytes(blob.size)} (${saving >= 0 ? "-" : "+"}${Math.abs(saving)}%) · ${width}×${height}`,
+export function makeSpec(supported: Set<string> | null): FileToolSpec {
+  return {
+    accept: "image/*",
+    options: [
+      {
+        kind: "select",
+        id: "format",
+        label: { tr: "Format", en: "Format" },
+        default: "image/webp",
+        choices: FORMATS.map((format) => {
+          const missing = supported !== null && !supported.has(format.mime);
+          return {
+            value: format.mime,
+            label: missing
+              ? {
+                  tr: `${format.name} (bu tarayıcıda yok)`,
+                  en: `${format.name} (not in this browser)`,
+                }
+              : { tr: format.name, en: format.name },
+          };
+        }),
       },
-    };
-  },
-};
+      {
+        kind: "select",
+        id: "quality",
+        label: { tr: "Kalite", en: "Quality" },
+        default: "0.8",
+        visibleWhen: (values) => values.format !== "image/png",
+        choices: ["0.5", "0.65", "0.8", "0.9", "1"].map((value) => ({
+          value,
+          label: {
+            tr: `%${Math.round(Number(value) * 100)}`,
+            en: `${Math.round(Number(value) * 100)}%`,
+          },
+        })),
+      },
+      {
+        kind: "text",
+        id: "background",
+        label: { tr: "Arka plan", en: "Background" },
+        default: "#fff",
+        width: "sm",
+        hint: {
+          tr: "JPEG saydamlık taşımaz; saydam alanlar bu renkle doldurulur.",
+          en: "JPEG has no transparency; transparent areas are filled with this colour.",
+        },
+        visibleWhen: (values) => values.format === "image/jpeg",
+      },
+      {
+        kind: "select",
+        id: "fit",
+        label: { tr: "Sınır", en: "Limit" },
+        default: "width",
+        choices: [
+          { value: "width", label: { tr: "Genişlik", en: "Width" } },
+          { value: "edge", label: { tr: "Uzun kenar", en: "Long edge" } },
+        ],
+      },
+      {
+        kind: "text",
+        id: "limit",
+        label: { tr: "En fazla", en: "At most" },
+        default: "",
+        width: "sm",
+        placeholder: { tr: "orijinal", en: "original" },
+        hint: {
+          tr: "Piksel. Boş bırakılırsa boyut değişmez; görsel hiçbir zaman büyütülmez.",
+          en: "Pixels. Empty keeps the size; the image is never enlarged.",
+        },
+      },
+    ],
+    run: async (file, options) => {
+      const format = formatOf(String(options.format));
+      if (supported && !supported.has(format.mime)) {
+        throw unsupportedFormat(format);
+      }
+      const limit = parseLimit(String(options.limit));
+      const background =
+        format.mime === "image/jpeg"
+          ? parseColor(String(options.background))
+          : "#ffffff";
+
+      let bitmap: ImageBitmap;
+      try {
+        bitmap = await decode(file);
+      } catch (cause) {
+        if (isHeic(file)) throw heicError();
+        throw cause;
+      }
+
+      try {
+        const { blob, width, height, filled } = await encodeImage(bitmap, {
+          format,
+          quality: Number(options.quality),
+          limit,
+          fit: (options.fit === "edge" ? "edge" : "width") as Fit,
+          background,
+        });
+        return {
+          blob,
+          filename: `${file.name.replace(/\.[^.]+$/, "")}.${format.extension}`,
+          stats: { before: file.size, after: blob.size },
+          note: resultNote({ format, width, height, filled }),
+        };
+      } finally {
+        bitmap.close();
+      }
+    },
+  };
+}
+
+export const spec = makeSpec(null);

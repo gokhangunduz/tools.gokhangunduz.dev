@@ -3,11 +3,11 @@ import type { ToolMeta } from "../types";
 export const meta: ToolMeta = {
   id: "image-convert",
   category: "image",
-  icon: "image",
+  icon: "images",
   name: { tr: "Görsel dönüştür ve küçült", en: "Convert and resize images" },
   blurb: {
-    tr: "WebP, AVIF, JPEG ya da PNG'ye çevirir, genişliği sınırlar ve kaç bayt kazandığını yazar.",
-    en: "Converts to WebP, AVIF, JPEG or PNG, caps the width, and reports the bytes saved.",
+    tr: "WebP, JPEG ya da PNG'ye çevirir, boyutu sınırlar ve kaç bayt kazandığını yazar.",
+    en: "Converts to WebP, JPEG or PNG, caps the size, and reports the bytes saved.",
   },
   keywords: {
     tr: [
@@ -18,7 +18,11 @@ export const meta: ToolMeta = {
       "jpeg",
       "png",
       "küçült",
+      "resize",
       "sıkıştır",
+      "compress",
+      "convert",
+      "optimize",
       "boyut",
     ],
     en: [
@@ -33,5 +37,4 @@ export const meta: ToolMeta = {
       "optimize",
     ],
   },
-  related: ["image-base64", "svg-optimize"],
 };
