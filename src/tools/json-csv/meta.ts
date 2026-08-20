@@ -2,16 +2,25 @@ import type { ToolMeta } from "../types";
 
 export const meta: ToolMeta = {
   id: "json-csv",
-  category: "convert",
-  icon: "shuffle",
+  category: "data",
+  icon: "sheet",
   name: { tr: "JSON ↔ CSV", en: "JSON ↔ CSV" },
   blurb: {
-    tr: "Başlık satırını anahtar olarak kullanır, sayıları sayı yapar; virgül, noktalı virgül ve sekme destekler.",
+    tr: "Header satırını key olarak kullanır, sayıları sayı yapar; virgül, noktalı virgül ve tab destekler.",
     en: "Uses the header row as keys and types the values; comma, semicolon or tab.",
   },
   keywords: {
-    tr: ["json", "csv", "tsv", "excel", "tablo", "çevir", "dışa aktar"],
+    tr: [
+      "json",
+      "csv",
+      "tsv",
+      "excel",
+      "tablo",
+      "çevir",
+      "convert",
+      "dışa aktar",
+      "export",
+    ],
     en: ["json", "csv", "tsv", "excel", "table", "convert", "export"],
   },
-  related: ["json-yaml"],
 };
