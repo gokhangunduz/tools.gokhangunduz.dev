@@ -49,3 +49,16 @@ describe("pascalCase", () => {
     expect(pascalCase("2fa")).toBe("F2fa");
   });
 });
+
+describe("merge with unknown", () => {
+  it("treats an empty array's unknown items as no information", () => {
+    expect(merge(infer(["a"]), infer([]))).toEqual({
+      kind: "array",
+      items: { kind: "string" },
+    });
+    expect(merge(infer([]), infer([1]))).toEqual({
+      kind: "array",
+      items: { kind: "integer" },
+    });
+  });
+});
