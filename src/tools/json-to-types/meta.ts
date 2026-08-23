@@ -2,11 +2,11 @@ import type { ToolMeta } from "../types";
 
 export const meta: ToolMeta = {
   id: "json-to-types",
-  category: "convert",
-  icon: "shuffle",
+  category: "data",
+  icon: "fileType",
   name: { tr: "JSON'dan tip üret", en: "JSON to types" },
   blurb: {
-    tr: "Örnek JSON'dan TypeScript arayüzü, Zod şeması, Go struct'ı ya da JSON Schema çıkarır.",
+    tr: "Örnek JSON'dan TypeScript interface'i, Zod schema'sı, Go struct'ı ya da JSON Schema üretir.",
     en: "Turns a JSON sample into a TypeScript interface, a Zod schema, a Go struct or JSON Schema.",
   },
   keywords: {
@@ -15,11 +15,13 @@ export const meta: ToolMeta = {
       "typescript",
       "interface",
       "tip",
+      "type",
       "zod",
       "go",
       "struct",
       "schema",
       "üret",
+      "generate",
     ],
     en: [
       "json",
@@ -33,5 +35,4 @@ export const meta: ToolMeta = {
       "generate",
     ],
   },
-  related: ["json-yaml", "format-code"],
 };
