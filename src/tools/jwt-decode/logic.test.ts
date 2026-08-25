@@ -1,16 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { SignJWT } from "jose";
-import { decodeToken, expiryNote, splitToken, verifyToken } from "./logic";
+import { exportJWK, exportSPKI, generateKeyPair, SignJWT } from "jose";
+import {
+  cleanToken,
+  decodedJson,
+  formatRelative,
+  SAMPLE_KEY,
+  SAMPLE_TOKEN,
+  splitToken,
+  timeAnnotation,
+  timeStatus,
+  verifyToken,
+} from "./logic";
 
-const SECRET = new TextEncoder().encode("a-secret-long-enough-for-hs256-xx");
+const SECRET = "a-secret-long-enough-for-hs256-xx";
 
 async function makeToken(claims: Record<string, unknown>, expires: string) {
   return new SignJWT(claims)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expires)
-    .sign(SECRET);
+    .sign(new TextEncoder().encode(SECRET));
 }
+
+describe("cleanToken", () => {
+  it("strips a Bearer prefix, quotes and whitespace", () => {
+    expect(cleanToken("  Bearer a.b.c\n")).toBe("a.b.c");
+    expect(cleanToken("bearer   a.b.c")).toBe("a.b.c");
+    expect(cleanToken('"a.b.c"')).toBe("a.b.c");
+    expect(cleanToken(" 'Bearer a.b.c' ")).toBe("a.b.c");
+    expect(cleanToken('Bearer "a.b.c"')).toBe("a.b.c");
+  });
+});
 
 describe("splitToken", () => {
   it("rejects anything that is not three parts", () => {
@@ -21,88 +41,120 @@ describe("splitToken", () => {
   it("rejects a part that is not JSON", () => {
     expect(() => splitToken("aGk.aGk.sig")).toThrow();
   });
-});
 
-describe("decodeToken", () => {
-  it("reads a token without any key", async () => {
-    const token = await makeToken({ sub: "42", role: "admin" }, "2h");
-    const output = decodeToken(token, false);
-    expect(output).toContain('"HS256"');
-    expect(output).toContain('"sub": "42"');
-    expect(output).toContain('"role": "admin"');
-  });
-
-  it("prints epoch claims as dates when asked", async () => {
+  it("reads a token behind a Bearer prefix", async () => {
     const token = await makeToken({ sub: "42" }, "2h");
-    expect(decodeToken(token, true)).toMatch(/"exp": "\d+ \(20\d\d-/);
+    expect(splitToken(`Bearer ${token}`).payload.sub).toBe("42");
   });
 
-  it("returns nothing for empty input", () => {
-    expect(decodeToken("   ", true)).toBe("");
+  it("decodes UTF-8 claims", () => {
+    expect(splitToken(SAMPLE_TOKEN).payload.name).toBe("Gökhan Gündüz");
   });
 });
 
-describe("expiryNote", () => {
-  it("reports a live token as not expired", async () => {
-    const token = await makeToken({ sub: "1" }, "2h");
-    expect(expiryNote(token)?.expired).toBe(false);
+describe("decodedJson", () => {
+  it("keeps timestamps as numbers", () => {
+    const json = decodedJson(splitToken(SAMPLE_TOKEN));
+    expect(JSON.parse(json).payload.exp).toBe(1924991999);
+    expect(json).toContain('"alg": "HS256"');
+  });
+});
+
+describe("timeStatus", () => {
+  const now = Date.UTC(2026, 8, 26);
+
+  it("reports a live token as valid, with the time left", () => {
+    const status = timeStatus({ exp: now / 1000 + 3600 }, now);
+    expect(status).toEqual({ state: "valid", ms: 3_600_000 });
   });
 
-  it("reports an expired token as expired", async () => {
-    const token = await makeToken({ sub: "1" }, "-1h");
-    expect(expiryNote(token)?.expired).toBe(true);
+  it("reports an expired token", () => {
+    expect(timeStatus({ exp: now / 1000 - 60 }, now).state).toBe("expired");
   });
 
-  it("says nothing about a token with no exp", async () => {
-    const token = await new SignJWT({ sub: "1" })
-      .setProtectedHeader({ alg: "HS256" })
-      .sign(SECRET);
-    expect(expiryNote(token)).toBeNull();
+  it("reports a token that is not valid yet", () => {
+    expect(timeStatus({ nbf: now / 1000 + 60 }, now).state).toBe("notYet");
+  });
+
+  it("says when there is no exp", () => {
+    expect(timeStatus({ sub: "1" }, now).state).toBe("noExp");
+  });
+});
+
+describe("formatRelative", () => {
+  it("speaks each language, with no mixed units", () => {
+    expect(formatRelative(111 * 86_400_000, "tr")).toBe("111 gün sonra");
+    expect(formatRelative(-2203 * 86_400_000, "en")).toBe("2,203 days ago");
+    expect(formatRelative(3 * 3_600_000, "en")).toBe("in 3 hours");
+    expect(formatRelative(-90_000, "tr")).toBe("2 dakika önce");
+  });
+});
+
+describe("timeAnnotation", () => {
+  it("annotates time claims only", () => {
+    const now = 1700000000 * 1000;
+    expect(timeAnnotation("iat", 1700000000, "en", now)).toContain(
+      "in 0 seconds",
+    );
+    expect(timeAnnotation("sub", 1700000000, "en", now)).toBeNull();
+    expect(timeAnnotation("exp", "soon", "en", now)).toBeNull();
   });
 });
 
 describe("verifyToken", () => {
-  it("accepts the right secret", async () => {
+  it("verifies the sample with the sample key", async () => {
+    expect(await verifyToken(SAMPLE_TOKEN, SAMPLE_KEY)).toEqual({
+      status: "valid",
+      alg: "HS256",
+    });
+  });
+
+  it("tells a wrong secret apart from an unreadable key", async () => {
     const token = await makeToken({ sub: "1" }, "2h");
+    expect((await verifyToken(token, "wrong-secret")).status).toBe("mismatch");
     expect(
-      await verifyToken(token, "a-secret-long-enough-for-hs256-xx"),
-    ).toContain("✓");
+      (await verifyToken(token, "-----BEGIN PUBLIC KEY-----\nxx\n-----END"))
+        .status,
+    ).toBe("badKey");
   });
 
-  it("rejects the wrong secret", async () => {
-    const token = await makeToken({ sub: "1" }, "2h");
-    await expect(
-      verifyToken(token, "wrong-secret-wrong-secret-wrong"),
-    ).rejects.toThrow();
-  });
-
-  it("reports an expired token whose signature is still good", async () => {
+  it("checks the signature of an expired token without failing on expiry", async () => {
     const token = await makeToken({ sub: "1" }, "-1h");
-    const result = await verifyToken(
-      token,
-      "a-secret-long-enough-for-hs256-xx",
+    expect((await verifyToken(token, SECRET)).status).toBe("valid");
+  });
+
+  it("verifies RS256 with an SPKI key, a JWK and a JWKS", async () => {
+    const { publicKey, privateKey } = await generateKeyPair("RS256");
+    const token = await new SignJWT({ sub: "1" })
+      .setProtectedHeader({ alg: "RS256", kid: "k2" })
+      .sign(privateKey);
+    const jwk = await exportJWK(publicKey);
+    expect((await verifyToken(token, await exportSPKI(publicKey))).status).toBe(
+      "valid",
     );
-    expect(result).toContain("süresi dolmuş");
+    expect((await verifyToken(token, JSON.stringify(jwk))).status).toBe(
+      "valid",
+    );
+    const other = await exportJWK((await generateKeyPair("RS256")).publicKey);
+    const jwks = {
+      keys: [
+        { ...other, kid: "k1" },
+        { ...jwk, kid: "k2" },
+      ],
+    };
+    expect((await verifyToken(token, JSON.stringify(jwks))).status).toBe(
+      "valid",
+    );
+    expect((await verifyToken(token, "plain-secret")).status).toBe("badKey");
   });
 
   it("refuses to pretend an unsigned token is verifiable", async () => {
-    const unsigned = await new SignJWT({ sub: "1" })
-      .setProtectedHeader({ alg: "none" })
-      .sign(new Uint8Array(0))
-      .catch(() => null);
-    // jose will not sign alg:none, so build it by hand — which is exactly the
-    // shape of the attack this check exists for.
-    const token =
-      unsigned ??
-      `${btoa('{"alg":"none"}')}.${btoa('{"sub":"1"}')}.`
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=/g, "");
-    await expect(verifyToken(token, "any-secret")).rejects.toThrow();
-  });
-
-  it("requires a key at all", async () => {
-    const token = await makeToken({ sub: "1" }, "2h");
-    await expect(verifyToken(token, "  ")).rejects.toThrow();
+    const token = `${btoa('{"alg":"none"}')}.${btoa('{"sub":"1"}')}.`
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+    expect(await verifyToken(token, "any-secret")).toEqual({
+      status: "unsigned",
+    });
   });
 });
