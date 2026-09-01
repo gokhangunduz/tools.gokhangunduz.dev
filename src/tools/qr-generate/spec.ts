@@ -1,53 +1,74 @@
-import type { TextToolSpec } from "../text-tool";
-import { CAPACITY, toSvg, type Level } from "./logic";
+import type { ToolOption } from "../text-tool";
 
-export const spec: TextToolSpec = {
-  directions: [
-    {
-      id: "generate",
-      label: { tr: "Üret", en: "Generate" },
-      sample: "https://tools.gokhangunduz.dev",
-      placeholder: {
-        tr: "URL, metin, WIFI:… ya da mailto:",
-        en: "A URL, text, WIFI:… or mailto:",
+export const SAMPLE = "https://tools.gokhangunduz.dev";
+
+export const OPTIONS: ToolOption[] = [
+  {
+    kind: "select",
+    id: "level",
+    label: { tr: "Hata düzeltme", en: "Error correction" },
+    default: "M",
+    hint: {
+      tr: "Üstüne logo konacaksa ya da baskı yıpranacaksa H seç; ekranda M yeter.",
+      en: "Pick H for a logo on top or a print that will wear; M is enough on a screen.",
+    },
+    choices: [
+      { value: "L", label: { tr: "L %7", en: "L 7%" } },
+      { value: "M", label: { tr: "M %15", en: "M 15%" } },
+      { value: "Q", label: { tr: "Q %25", en: "Q 25%" } },
+      { value: "H", label: { tr: "H %30", en: "H 30%" } },
+    ],
+  },
+  {
+    kind: "select",
+    id: "margin",
+    label: { tr: "Kenar boşluğu", en: "Margin" },
+    default: "4",
+    choices: [
+      { value: "0", label: { tr: "0 modül", en: "0 modules" } },
+      { value: "1", label: { tr: "1 modül", en: "1 module" } },
+      { value: "2", label: { tr: "2 modül", en: "2 modules" } },
+      {
+        value: "4",
+        label: { tr: "4 modül (standart)", en: "4 modules (standard)" },
       },
-      run: (input, options) =>
-        toSvg(input, options.level as Level, Number(options.margin)),
-      footnote: (input, _output, options) => {
-        const level = options.level as Level;
-        return {
-          tr: `${input.length} / ${CAPACITY[level]} karakter · çıktı SVG, istediğin boyutta net kalır`,
-          en: `${input.length} of ${CAPACITY[level]} characters · the output is SVG, sharp at any size`,
-        };
-      },
-    },
-  ],
-  options: [
-    {
-      kind: "select",
-      id: "level",
-      label: { tr: "Hata düzeltme", en: "Error correction" },
-      default: "M",
-      choices: [
-        { value: "L", label: { tr: "L (%7)", en: "L (7%)" } },
-        { value: "M", label: { tr: "M (%15)", en: "M (15%)" } },
-        { value: "Q", label: { tr: "Q (%25)", en: "Q (25%)" } },
-        {
-          value: "H",
-          label: { tr: "H (%30, logo için)", en: "H (30%, for a logo)" },
-        },
-      ],
-    },
-    {
-      kind: "select",
-      id: "margin",
-      label: { tr: "Kenar boşluğu", en: "Margin" },
-      default: "2",
-      choices: ["0", "1", "2", "4"].map((value) => ({
-        value,
-        label: { tr: value, en: value },
-      })),
-    },
-  ],
-  outputExtension: "svg",
-};
+    ],
+  },
+];
+
+export const WIFI_OPTIONS: ToolOption[] = [
+  {
+    kind: "text",
+    id: "ssid",
+    label: { tr: "Ağ adı (SSID)", en: "Network name (SSID)" },
+    default: "",
+    width: "fill",
+  },
+  {
+    kind: "select",
+    id: "security",
+    label: { tr: "Güvenlik", en: "Security" },
+    default: "WPA",
+    choices: [
+      { value: "WPA", label: { tr: "WPA/WPA2/WPA3", en: "WPA/WPA2/WPA3" } },
+      { value: "WEP", label: { tr: "WEP", en: "WEP" } },
+      { value: "nopass", label: { tr: "Yok", en: "None" } },
+    ],
+  },
+  {
+    kind: "text",
+    id: "password",
+    label: { tr: "Şifre", en: "Password" },
+    default: "",
+    width: "fill",
+    sensitive: true,
+    secret: true,
+    visibleWhen: (values) => values.security !== "nopass",
+  },
+  {
+    kind: "switch",
+    id: "hidden",
+    label: { tr: "Gizli ağ", en: "Hidden network" },
+    default: false,
+  },
+];
