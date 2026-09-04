@@ -2,11 +2,11 @@ import type { ToolMeta } from "../types";
 
 export const meta: ToolMeta = {
   id: "regex-test",
-  category: "validate",
-  icon: "squareCheck",
-  name: { tr: "RegExp test", en: "RegExp tester" },
+  category: "text",
+  icon: "regex",
+  name: { tr: "RegExp tester", en: "RegExp tester" },
   blurb: {
-    tr: "Eşleşmeleri konumu ve yakalama gruplarıyla listeler; değiştirme ve bölme de aynı sayfada.",
+    tr: "Eşleşmeleri konumu ve capture group'larıyla listeler; replace ve split de aynı sayfada.",
     en: "Lists matches with their position and capture groups; replace and split are on the same page.",
   },
   keywords: {
@@ -18,6 +18,7 @@ export const meta: ToolMeta = {
       "eşleşme",
       "test",
       "değiştir",
+      "replace",
     ],
     en: [
       "regex",
@@ -29,5 +30,4 @@ export const meta: ToolMeta = {
       "replace",
     ],
   },
-  related: ["text-lines", "jsonpath"],
 };
