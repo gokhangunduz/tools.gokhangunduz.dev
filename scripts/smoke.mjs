@@ -21,9 +21,9 @@ const registry = readFileSync(
   new URL("../src/tools/components.ts", import.meta.url),
   "utf8",
 );
-const ids = [...registry.matchAll(/^\s+(?:"([^"]+)"|([a-zA-Z0-9]+)):\s*dynamic/gm)].map(
-  (match) => match[1] ?? match[2],
-);
+const ids = [
+  ...registry.matchAll(/^\s+(?:"([^"]+)"|([a-zA-Z0-9]+)):\s*dynamic/gm),
+].map((match) => match[1] ?? match[2]);
 
 if (ids.length === 0) {
   console.error("No tools found in components.ts");
@@ -32,9 +32,9 @@ if (ids.length === 0) {
 
 // These reach a third-party API; they are opened and checked for errors, but
 // their output is not required, because a failing network is not a bug here.
-const NETWORK = new Set(["dns-lookup", "rdap", "ip-geo"]);
+const NETWORK = new Set(["dns-lookup", "ip-geo"]);
 // These take a file, so there is nothing to type and no sample to press.
-const FILE_INPUT = new Set(["image-base64", "image-convert", "qr-read", "exif"]);
+const FILE_INPUT = new Set(["image-base64", "image-convert"]);
 
 const browser = await chromium.launch();
 const failures = [];
@@ -46,13 +46,26 @@ for (const locale of ["tr", "en"]) {
     const problems = [];
 
     page.on("console", (message) => {
-      if (message.type() === "error") problems.push(`console: ${message.text()}`);
+      if (message.type() !== "error") return;
+      // A network tool's third-party service refusing (a 429, an outage) is the
+      // failing network the NETWORK set exists to tolerate.
+      if (
+        NETWORK.has(id) &&
+        message.text().startsWith("Failed to load resource")
+      )
+        return;
+      problems.push(`console: ${message.text()}`);
     });
-    page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
+    page.on("pageerror", (error) =>
+      problems.push(`pageerror: ${error.message}`),
+    );
 
     const url = `${BASE}/${locale}/${id}`;
     try {
-      const response = await page.goto(url, { waitUntil: "networkidle", timeout: 30_000 });
+      const response = await page.goto(url, {
+        waitUntil: "networkidle",
+        timeout: 30_000,
+      });
       if (!response || response.status() >= 400) {
         problems.push(`http ${response?.status()}`);
       }
@@ -62,7 +75,8 @@ for (const locale of ["tr", "en"]) {
 
       if (!FILE_INPUT.has(id)) {
         const sample = page.getByRole("button", {
-          name: locale === "tr" ? "Örnek doldur" : "Load sample",
+          name: locale === "tr" ? "Örnek" : "Sample",
+          exact: true,
         });
         if (await sample.count()) {
           await sample.first().click();
@@ -72,15 +86,18 @@ for (const locale of ["tr", "en"]) {
         // `data-tool-error` rather than `[role="alert"]`: Next's dev overlay
         // renders an empty live region that matches the latter on every page.
         const alert = page.locator("[data-tool-error]");
-        if (await alert.count()) {
-          problems.push(`error shown: ${(await alert.first().innerText()).slice(0, 120)}`);
+        if (!NETWORK.has(id) && (await alert.count())) {
+          problems.push(
+            `error shown: ${(await alert.first().innerText()).slice(0, 120)}`,
+          );
         }
 
         if (!NETWORK.has(id)) {
           const output = page.locator("textarea[readonly]");
           if (await output.count()) {
             const value = await output.first().inputValue();
-            if (!value.trim()) problems.push("output stayed empty after the sample");
+            if (!value.trim())
+              problems.push("output stayed empty after the sample");
           }
         }
       }
