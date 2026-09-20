@@ -1,13 +1,25 @@
 import type { GeneratorSpec } from "../generator-tool";
-import { generateIds, inspect, type Kind } from "./logic";
+import type { OptionValues } from "../text-tool";
+import {
+  footnoteFor,
+  formatIds,
+  generateIds,
+  type Kind,
+  type ListFormat,
+} from "./logic";
+
+const dashed = (values: OptionValues) =>
+  values.kind === "v4" || values.kind === "v7";
 
 export const spec: GeneratorSpec = {
-  generate: (options) =>
-    generateIds(
+  generate: (options) => {
+    const items = generateIds(
       options.kind as Kind,
-      Number(options.count),
-      options.upper === true,
-    ),
+      Number(String(options.count).trim() || NaN),
+      { upper: options.upper === true, dashes: options.dashes !== true },
+    );
+    return { items, text: formatIds(items, options.format as ListFormat) };
+  },
   options: [
     {
       kind: "select",
@@ -23,33 +35,56 @@ export const spec: GeneratorSpec = {
           value: "v7",
           label: { tr: "UUID v7 (zamana göre)", en: "UUID v7 (time-ordered)" },
         },
-        { value: "ulid", label: { tr: "ULID", en: "ULID" } },
-        { value: "nanoid", label: { tr: "Nano ID", en: "Nano ID" } },
+        {
+          value: "ulid",
+          label: {
+            tr: "ULID (zamana göre, 26 karakter)",
+            en: "ULID (time-ordered, 26 characters)",
+          },
+        },
+        {
+          value: "nanoid",
+          label: {
+            tr: "Nano ID (kısa, URL-safe)",
+            en: "Nano ID (short, URL-safe)",
+          },
+        },
       ],
     },
     {
-      kind: "select",
+      kind: "text",
       id: "count",
       label: { tr: "Adet", en: "Count" },
       default: "1",
-      choices: ["1", "5", "10", "50", "100"].map((value) => ({
-        value,
-        label: { tr: value, en: value },
-      })),
+      width: "sm",
+      hint: { tr: "1 ile 1000 arası", en: "Between 1 and 1000" },
+    },
+    {
+      kind: "select",
+      id: "format",
+      label: { tr: "Çıktı biçimi", en: "Output format" },
+      default: "lines",
+      choices: [
+        { value: "lines", label: { tr: "Satır satır", en: "One per line" } },
+        { value: "json", label: { tr: "JSON dizisi", en: "JSON array" } },
+        { value: "comma", label: { tr: "Virgülle", en: "Comma-separated" } },
+        { value: "sql", label: { tr: "SQL IN", en: "SQL IN" } },
+      ],
+    },
+    {
+      kind: "switch",
+      id: "dashes",
+      label: { tr: "Tire yok", en: "No dashes" },
+      default: false,
+      visibleWhen: dashed,
     },
     {
       kind: "switch",
       id: "upper",
       label: { tr: "Büyük harf", en: "Uppercase" },
       default: false,
+      visibleWhen: dashed,
     },
   ],
-  footnote: (output) => {
-    const described = inspect(output.split("\n")[0]);
-    if (described) return { tr: described, en: described };
-    return {
-      tr: "v7 ve ULID zamana göre sıralanır; veritabanı birincil anahtarı için v4'ten iyidir.",
-      en: "v7 and ULID sort by time, which beats v4 as a database primary key.",
-    };
-  },
+  footnote: (output, values) => footnoteFor(values.kind as Kind, output),
 };
