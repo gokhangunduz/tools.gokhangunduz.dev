@@ -1,0 +1,40 @@
+# The whole verification ladder on every push to main and every pull request.
+# Cloudflare Pages builds and deploys the site itself from Git, so there is no
+# deploy job here: this workflow only says whether what is about to ship holds.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - run: npm ci
+
+      - name: Install the smoke run's browser
+        run: npx playwright install --with-deps chromium
+
+      # invariants, typecheck, tests, lint, build, smoke.
+      - name: Verification ladder
+        run: zsh verify/all.sh
