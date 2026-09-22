@@ -1,0 +1,10 @@
+# Hex colours allowed outside src/app/globals.css, one "<path> <#hex>" per line.
+# Each is a place that cannot read a CSS variable. Adding a line is a decision
+# that this value will never follow the tokens, not a way to silence the check.
+
+# <meta name="theme-color">: the browser reads it before any stylesheet.
+src/app/[locale]/layout.tsx #fafafa
+src/app/[locale]/layout.tsx #09090b
+
+# manifest.webmanifest: read by the OS when installing, no CSS at all.
+src/app/manifest.ts #ffffff
