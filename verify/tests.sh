@@ -11,6 +11,6 @@ fi
 
 # Zero executed tests is a failure, not a quiet success: a filter that matches
 # nothing must not read as green.
-count=$(sed -nE 's/.*Tests +([0-9]+) passed.*/\1/p' "$log" | tail -1)
+count=$(sed -E $'s/\x1b\\[[0-9;]*m//g' "$log" | sed -nE 's/.*Tests +([0-9]+) passed.*/\1/p' | tail -1)
 [[ -n "$count" && "$count" -gt 0 ]] || { tail -20 "$log" >&2; fail "vitest exited 0 but no test ran${1:+ for \"$1\"}" }
 pass "tests: $count passed${1:+ ($1)}"
