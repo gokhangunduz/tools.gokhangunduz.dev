@@ -1,6 +1,6 @@
 # tools.gokhangunduz.dev
 
-Developer tools that run entirely in the browser — encoders, hashes, formatters, converters, generators and reference tables, in Turkish and English, light and dark.
+Developer tools that run entirely in the browser — encoders, hashes, formatters, converters and generators, in Turkish and English, light and dark.
 
 Nothing typed into a tool leaves the page. The input is kept in the URL fragment so a link can be shared, and a fragment is never sent to a server. The few tools that query a third-party API (DNS, RDAP, IP geolocation) say so on the page.
 
