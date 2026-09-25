@@ -35,12 +35,15 @@ import { cn } from "@/lib/utils";
 /**
  * Renders any tool that is "text in, text out".
  *
- * The conversion runs synchronously on every keystroke. That is the right
+ * The conversion runs on every keystroke, with no debounce. That is the right
  * default for the work these tools do — encoding a paragraph is microseconds —
- * and it is what makes the page feel like a calculator rather than a form. A
- * tool whose work is genuinely slow (a wasm formatter, a large parse) is
- * expected to say so by shipping its own component with a worker behind it,
- * not to be handled by a debounce here that would make every fast tool lag.
+ * and it is what makes the page feel like a calculator rather than a form.
+ *
+ * A direction that returns a promise (WebCrypto, a wasm hash) is awaited here
+ * instead: the last resolved output stays on screen while the next one is
+ * computed, so the panel does not blink empty between keystrokes, and results
+ * that arrive out of order are dropped by comparing against the promise that
+ * is current.
  */
 export default function TextTool({
   locale,
@@ -76,20 +79,59 @@ export default function TextTool({
     return () => window.clearTimeout(id);
   }, [input]);
 
-  const { output, error } = useMemo(() => {
-    if (!input) return { output: "", error: null as string | null };
+  // Synchronous directions settle here; async ones hand back the promise for
+  // the effect below, which is the only place allowed to call setState.
+  const computed = useMemo((): {
+    output: string;
+    error: string | null;
+    promise: Promise<string> | null;
+  } => {
+    if (!input) return { output: "", error: null, promise: null };
     try {
-      return { output: active.run(input, values), error: null };
+      const value = active.run(input, values);
+      return value instanceof Promise
+        ? { output: "", error: null, promise: value }
+        : { output: value, error: null, promise: null };
     } catch (cause) {
-      const message =
-        cause instanceof ToolError
-          ? pick(locale, cause.localized)
-          : cause instanceof Error
-            ? cause.message
-            : String(cause);
-      return { output: "", error: message };
+      return { output: "", error: describe(cause, locale), promise: null };
     }
   }, [active, input, values, locale]);
+
+  const [resolved, setResolved] = useState<{
+    promise: Promise<string>;
+    output: string;
+    error: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    const promise = computed.promise;
+    if (!promise) return;
+    let live = true;
+    promise
+      .then((output) => {
+        if (live) setResolved({ promise, output, error: null });
+      })
+      .catch((cause: unknown) => {
+        if (live) {
+          setResolved({ promise, output: "", error: describe(cause, locale) });
+        }
+      });
+    return () => {
+      live = false;
+    };
+  }, [computed, locale]);
+
+  const settled = computed.promise
+    ? resolved?.promise === computed.promise
+      ? resolved
+      : null
+    : computed;
+  const output = settled?.output ?? "";
+  const error = settled?.error ?? null;
+  const pending = computed.promise !== null && settled === null;
+  const footnote = output
+    ? (active.footnote?.(input, output, values) ?? null)
+    : null;
 
   const setOption = useCallback((id: string, value: OptionValue) => {
     setValues((current) => ({ ...current, [id]: value }));
@@ -239,8 +281,13 @@ export default function TextTool({
               value={output}
               readOnly
               placeholder={t(locale, "tool.emptyOutput")}
-              className="bg-muted/40"
+              className={cn("bg-muted/40", pending && "opacity-60")}
             />
+          )}
+          {footnote && !error && (
+            <p className="text-xs text-muted-foreground tabular">
+              {pick(locale, footnote)}
+            </p>
           )}
         </Pane>
       </div>
@@ -295,4 +342,11 @@ function PaneButton({
       <span className="sr-only sm:not-sr-only">{label}</span>
     </Button>
   );
+}
+
+/** Turns anything thrown into a line the user can act on. */
+function describe(cause: unknown, locale: Locale): string {
+  if (cause instanceof ToolError) return pick(locale, cause.localized);
+  if (cause instanceof Error) return cause.message;
+  return String(cause);
 }

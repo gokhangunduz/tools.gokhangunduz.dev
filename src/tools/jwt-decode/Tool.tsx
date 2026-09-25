@@ -5,5 +5,5 @@ import type { Locale } from "@/i18n";
 import { spec } from "./spec";
 
 export default function Tool({ locale }: { locale: Locale }) {
-  return <TextTool locale={locale} spec={spec} toolId="base64-text" />;
+  return <TextTool locale={locale} spec={spec} toolId="jwt-decode" />;
 }
