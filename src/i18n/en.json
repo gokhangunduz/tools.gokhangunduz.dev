@@ -34,7 +34,8 @@
     "related": "Related tools",
     "emptyOutput": "Output will appear here",
     "favorite": "Add to favourites",
-    "unfavorite": "Remove from favourites"
+    "unfavorite": "Remove from favourites",
+    "generate": "Generate"
   },
   "home": {
     "favorites": "Favourites",
@@ -59,5 +60,9 @@
   "footer": {
     "privacy": "Everything runs in your browser; your input never reaches a server.",
     "source": "Source code"
+  },
+  "reference": {
+    "filter": "Search the table…",
+    "count": "{shown} of {total} rows"
   }
 }
