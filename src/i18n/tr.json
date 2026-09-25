@@ -1,0 +1,63 @@
+{
+  "app": {
+    "name": "tools.gokhangunduz.dev",
+    "short": "tools",
+    "tagline": "Geliştiriciler için hızlı, reklamsız, tarayıcıda çalışan araçlar",
+    "description": "Base64, JWT, hash, JSON, cron ve onlarca araç. Girdiğiniz hiçbir şey sunucuya gitmez."
+  },
+  "search": {
+    "placeholder": "Araç ara veya bir şey yapıştır…",
+    "empty": "Eşleşen araç yok",
+    "detected": "Yapıştırdığın değer şuna benziyor:",
+    "hint": "aramak için yaz, gezinmek için ok tuşları"
+  },
+  "nav": {
+    "home": "Ana sayfa",
+    "allTools": "Tüm araçlar",
+    "categories": "Kategoriler",
+    "openPalette": "Araç ara",
+    "toolCount": "{count} araç"
+  },
+  "tool": {
+    "input": "Girdi",
+    "output": "Çıktı",
+    "options": "Seçenekler",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "clear": "Temizle",
+    "paste": "Yapıştır",
+    "sample": "Örnek doldur",
+    "download": "İndir",
+    "share": "Bağlantıyı kopyala",
+    "shared": "Bağlantı kopyalandı",
+    "swap": "Yönü değiştir",
+    "related": "İlgili araçlar",
+    "emptyOutput": "Çıktı burada görünecek",
+    "favorite": "Favorilere ekle",
+    "unfavorite": "Favorilerden çıkar"
+  },
+  "home": {
+    "favorites": "Favoriler",
+    "recent": "Son kullanılanlar",
+    "noFavorites": "Bir aracın yanındaki yıldıza basarsan burada durur."
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem"
+  },
+  "locale": {
+    "label": "Dil",
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "error": {
+    "notFound": "Böyle bir araç yok.",
+    "backHome": "Ana sayfaya dön"
+  },
+  "footer": {
+    "privacy": "Her şey tarayıcında çalışır; girdiğin veri sunucuya gitmez.",
+    "source": "Kaynak kod"
+  }
+}

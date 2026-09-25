@@ -1,0 +1,298 @@
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import {
+  Check,
+  ClipboardPaste,
+  Copy,
+  Download,
+  Eraser,
+  Wand2,
+} from "lucide-react";
+import type { Locale } from "@/i18n";
+import { pick, t } from "@/i18n";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import OptionRow from "@/components/OptionRow";
+import { copyText, downloadText, readText } from "@/lib/clipboard";
+import { readShared, subscribeShared, writeShared } from "@/lib/share";
+import {
+  defaultValues,
+  ToolError,
+  type OptionValue,
+  type OptionValues,
+  type TextToolSpec,
+} from "@/tools/text-tool";
+import { cn } from "@/lib/utils";
+
+/**
+ * Renders any tool that is "text in, text out".
+ *
+ * The conversion runs synchronously on every keystroke. That is the right
+ * default for the work these tools do — encoding a paragraph is microseconds —
+ * and it is what makes the page feel like a calculator rather than a form. A
+ * tool whose work is genuinely slow (a wasm formatter, a large parse) is
+ * expected to say so by shipping its own component with a worker behind it,
+ * not to be handled by a debounce here that would make every fast tool lag.
+ */
+export default function TextTool({
+  locale,
+  spec,
+  toolId,
+}: {
+  locale: Locale;
+  spec: TextToolSpec;
+  toolId: string;
+}) {
+  const [direction, setDirection] = useState(spec.directions[0].id);
+  // The fragment is an external store, read straight through rather than
+  // copied into state on mount. Once anything is typed, that wins: `typed`
+  // going from null to a string is the moment the link stops being the source.
+  const shared = useSyncExternalStore(subscribeShared, readShared, () => null);
+  const [typed, setTyped] = useState<string | null>(null);
+  const input = typed ?? shared ?? "";
+  const setInput = setTyped;
+  const [values, setValues] = useState<OptionValues>(() =>
+    defaultValues(spec.options),
+  );
+  const [copied, setCopied] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const active =
+    spec.directions.find((d) => d.id === direction) ?? spec.directions[0];
+
+  // And keep it current afterwards, so the address bar is always the link to
+  // send. Replaces rather than pushes: Back should leave the tool, not undo
+  // the last keystroke.
+  useEffect(() => {
+    const id = window.setTimeout(() => writeShared(input), 300);
+    return () => window.clearTimeout(id);
+  }, [input]);
+
+  const { output, error } = useMemo(() => {
+    if (!input) return { output: "", error: null as string | null };
+    try {
+      return { output: active.run(input, values), error: null };
+    } catch (cause) {
+      const message =
+        cause instanceof ToolError
+          ? pick(locale, cause.localized)
+          : cause instanceof Error
+            ? cause.message
+            : String(cause);
+      return { output: "", error: message };
+    }
+  }, [active, input, values, locale]);
+
+  const setOption = useCallback((id: string, value: OptionValue) => {
+    setValues((current) => ({ ...current, [id]: value }));
+  }, []);
+
+  const copy = useCallback(async () => {
+    if (!output) return;
+    if (await copyText(output)) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    }
+  }, [output]);
+
+  // Cmd/Ctrl+Shift+C copies the output from anywhere on the page, so the
+  // result can be taken without leaving the keyboard or the input box.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.shiftKey &&
+        event.key === "C"
+      ) {
+        event.preventDefault();
+        void copy();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [copy]);
+
+  const sample = active.sample;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {(spec.directions.length > 1 || (spec.options?.length ?? 0) > 0) && (
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {spec.directions.length > 1 ? (
+            <div className="inline-flex rounded-md border p-0.5">
+              {spec.directions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setDirection(option.id)}
+                  aria-pressed={option.id === direction}
+                  className={cn(
+                    "rounded-[4px] px-3 py-1.5 text-sm font-medium transition-colors",
+                    option.id === direction
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {pick(locale, option.label)}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span />
+          )}
+          <OptionRow
+            locale={locale}
+            options={spec.options ?? []}
+            values={values}
+            onChange={setOption}
+          />
+        </div>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Pane
+          label={t(locale, "tool.input")}
+          actions={
+            <>
+              {sample && (
+                <PaneButton
+                  icon={Wand2}
+                  label={t(locale, "tool.sample")}
+                  onClick={() => setInput(sample)}
+                />
+              )}
+              <PaneButton
+                icon={ClipboardPaste}
+                label={t(locale, "tool.paste")}
+                onClick={async () => {
+                  const text = await readText();
+                  if (text !== null) setInput(text);
+                  else inputRef.current?.focus();
+                }}
+              />
+              <PaneButton
+                icon={Eraser}
+                label={t(locale, "tool.clear")}
+                onClick={() => {
+                  setInput("");
+                  inputRef.current?.focus();
+                }}
+                disabled={!input}
+              />
+            </>
+          }
+        >
+          <Textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={
+              active.placeholder ? pick(locale, active.placeholder) : undefined
+            }
+            autoFocus
+          />
+        </Pane>
+
+        <Pane
+          label={t(locale, "tool.output")}
+          actions={
+            <>
+              <PaneButton
+                icon={Download}
+                label={t(locale, "tool.download")}
+                onClick={() =>
+                  downloadText(
+                    output,
+                    `${toolId}.${spec.outputExtension ?? "txt"}`,
+                  )
+                }
+                disabled={!output}
+              />
+              <PaneButton
+                icon={copied ? Check : Copy}
+                label={
+                  copied ? t(locale, "tool.copied") : t(locale, "tool.copy")
+                }
+                onClick={copy}
+                disabled={!output}
+              />
+            </>
+          }
+        >
+          {error ? (
+            <p
+              role="alert"
+              className="min-h-40 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
+            >
+              {error}
+            </p>
+          ) : (
+            <Textarea
+              value={output}
+              readOnly
+              placeholder={t(locale, "tool.emptyOutput")}
+              className="bg-muted/40"
+            />
+          )}
+        </Pane>
+      </div>
+    </div>
+  );
+}
+
+function Pane({
+  label,
+  actions,
+  children,
+}: {
+  label: string;
+  actions: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-2">
+      <header className="flex h-8 items-center justify-between">
+        <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </h2>
+        <div className="flex items-center gap-1">{actions}</div>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function PaneButton({
+  icon: Icon,
+  label,
+  onClick,
+  disabled,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      disabled={disabled}
+      // The label is present for screen readers at every width and shown from
+      // `sm` up; on a phone the row would wrap to two lines with it.
+      title={label}
+    >
+      <Icon className="size-3.5" />
+      <span className="sr-only sm:not-sr-only">{label}</span>
+    </Button>
+  );
+}
