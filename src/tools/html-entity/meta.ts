@@ -6,8 +6,8 @@ export const meta: ToolMeta = {
   icon: "binary",
   name: { tr: "HTML entity kodla / çöz", en: "HTML entity encode / decode" },
   blurb: {
-    tr: "&lt; &amp; &#199; — markup'ı çalıştırmadan, metin üzerinde çözer.",
-    en: "&lt; &amp; &#199; — decoded on the text, without running the markup.",
+    tr: "< & Ç gibi karakterleri entity'ye çevirir; çözerken markup'ı çalıştırmaz.",
+    en: "Turns <, & and Ç into entities, and decodes on the text without running the markup.",
   },
   keywords: {
     tr: ["html", "entity", "kaçış", "escape", "özel karakter", "kodla", "çöz"],

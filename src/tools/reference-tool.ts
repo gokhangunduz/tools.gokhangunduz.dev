@@ -11,6 +11,13 @@ import type { Localized } from "@/i18n";
 export type ReferenceSpec = {
   columns: Localized[];
   rows: string[][];
-  /** Rows whose first cell starts with this get a section heading instead. */
-  groups?: { label: Localized; match: (row: string[]) => boolean }[];
+  /**
+   * The column whose cells are written as "Türkçe / English" and should be
+   * split to the active language.
+   *
+   * Declared rather than detected: a cell like "Windows 10 / 11" would be cut
+   * in half by a rule that guessed, and these tables are the one place where
+   * a silent mangling would go unnoticed for a long time.
+   */
+  bilingualColumn?: number;
 };

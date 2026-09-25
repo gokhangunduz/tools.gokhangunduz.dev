@@ -16,7 +16,8 @@
     "allTools": "All tools",
     "categories": "Categories",
     "openPalette": "Search tools",
-    "toolCount": "{count} tools"
+    "toolCount": "{count} tools",
+    "skipToContent": "Skip to content"
   },
   "tool": {
     "input": "Input",
@@ -35,12 +36,14 @@
     "emptyOutput": "Output will appear here",
     "favorite": "Add to favourites",
     "unfavorite": "Remove from favourites",
-    "generate": "Generate"
+    "generate": "Generate",
+    "networkWarning": "This tool queries a third-party service, so what you enter is sent to it."
   },
   "home": {
     "favorites": "Favourites",
     "recent": "Recently used",
-    "noFavorites": "Star a tool and it stays here."
+    "noFavorites": "Star a tool and it stays here.",
+    "promise": "Nothing leaves your browser"
   },
   "theme": {
     "label": "Theme",
@@ -55,11 +58,11 @@
   },
   "error": {
     "notFound": "No such tool.",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "notFoundHint": "The address may be wrong, or the tool may have moved. Try the search on the home page, or ⌘K."
   },
   "footer": {
-    "privacy": "Everything runs in your browser; your input never reaches a server.",
-    "source": "Source code"
+    "privacy": "Everything runs in your browser; your input never reaches a server."
   },
   "reference": {
     "filter": "Search the table…",

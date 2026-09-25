@@ -23,13 +23,25 @@ export default function ReferenceTool({
 }) {
   const [query, setQuery] = useState("");
 
+  // Split to the active language first, then filtered — so a search matches
+  // what is on screen rather than the other language's half of the cell.
+  const localized = useMemo(
+    () =>
+      spec.rows.map((row) =>
+        row.map((cell, index) =>
+          index === spec.bilingualColumn ? split(cell, locale) : cell,
+        ),
+      ),
+    [spec.rows, spec.bilingualColumn, locale],
+  );
+
   const rows = useMemo(() => {
     const needle = normalize(query);
-    if (!needle) return spec.rows;
-    return spec.rows.filter((row) =>
+    if (!needle) return localized;
+    return localized.filter((row) =>
       row.some((cell) => normalize(cell).includes(needle)),
     );
-  }, [spec.rows, query]);
+  }, [localized, query]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -104,4 +116,16 @@ function normalize(value: string): string {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/ı/g, "i");
+}
+
+/**
+ * Takes one side of a "Türkçe / English" cell.
+ *
+ * Only the first separator counts: the English half often contains a slash of
+ * its own, as in `application/json`.
+ */
+function split(cell: string, locale: Locale): string {
+  const at = cell.indexOf(" / ");
+  if (at === -1) return cell;
+  return locale === "tr" ? cell.slice(0, at) : cell.slice(at + 3);
 }

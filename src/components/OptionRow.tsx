@@ -2,6 +2,7 @@
 
 import type { Locale } from "@/i18n";
 import { pick } from "@/i18n";
+import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { OptionValue, OptionValues, ToolOption } from "@/tools/text-tool";
 import { cn } from "@/lib/utils";
@@ -55,20 +56,23 @@ export default function OptionRow({
               className="flex items-center gap-2 text-sm text-muted-foreground"
             >
               {label}
-              <select
-                value={String(values[option.id])}
-                onChange={(e) => onChange(option.id, e.target.value)}
-                className={cn(
-                  "h-8 rounded-md border bg-background px-2 text-sm text-foreground outline-none",
-                  "focus-visible:ring-[3px] focus-visible:ring-ring/25",
-                )}
-              >
-                {option.choices.map((choice) => (
-                  <option key={choice.value} value={choice.value}>
-                    {pick(locale, choice.label)}
-                  </option>
-                ))}
-              </select>
+              <span className="relative">
+                <select
+                  value={String(values[option.id])}
+                  onChange={(e) => onChange(option.id, e.target.value)}
+                  className={cn(
+                    "h-8 appearance-none rounded-md border bg-background pl-2.5 pr-7 text-sm text-foreground outline-none transition-colors",
+                    "hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/25",
+                  )}
+                >
+                  {option.choices.map((choice) => (
+                    <option key={choice.value} value={choice.value}>
+                      {pick(locale, choice.label)}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              </span>
             </label>
           );
         }
@@ -87,7 +91,7 @@ export default function OptionRow({
                   : undefined
               }
               onChange={(e) => onChange(option.id, e.target.value)}
-              className="h-8 w-44 font-mono text-sm"
+              className="h-8 w-44 max-w-[55vw] font-mono text-sm"
             />
           </label>
         );

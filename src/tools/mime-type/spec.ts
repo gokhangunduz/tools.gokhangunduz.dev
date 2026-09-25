@@ -8,6 +8,7 @@ import type { ReferenceSpec } from "../reference-tool";
  * ones that get typed into a Content-Type header by hand.
  */
 export const spec: ReferenceSpec = {
+  bilingualColumn: 2,
   columns: [
     { tr: "MIME türü", en: "MIME type" },
     { tr: "Uzantı", en: "Extension" },

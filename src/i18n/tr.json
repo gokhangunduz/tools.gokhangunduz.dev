@@ -16,7 +16,8 @@
     "allTools": "Tüm araçlar",
     "categories": "Kategoriler",
     "openPalette": "Araç ara",
-    "toolCount": "{count} araç"
+    "toolCount": "{count} araç",
+    "skipToContent": "İçeriğe geç"
   },
   "tool": {
     "input": "Girdi",
@@ -35,12 +36,14 @@
     "emptyOutput": "Çıktı burada görünecek",
     "favorite": "Favorilere ekle",
     "unfavorite": "Favorilerden çıkar",
-    "generate": "Üret"
+    "generate": "Üret",
+    "networkWarning": "Bu araç sorgu için dış bir servise istek atar; girdiğin değer o servise gider."
   },
   "home": {
     "favorites": "Favoriler",
     "recent": "Son kullanılanlar",
-    "noFavorites": "Bir aracın yanındaki yıldıza basarsan burada durur."
+    "noFavorites": "Bir aracın yanındaki yıldıza basarsan burada durur.",
+    "promise": "Hiçbir şey sunucuya gitmez"
   },
   "theme": {
     "label": "Tema",
@@ -55,11 +58,11 @@
   },
   "error": {
     "notFound": "Böyle bir araç yok.",
-    "backHome": "Ana sayfaya dön"
+    "backHome": "Ana sayfaya dön",
+    "notFoundHint": "Adres yanlış olabilir ya da araç taşınmış olabilir. Ana sayfadaki aramadan ya da ⌘K ile arayabilirsin."
   },
   "footer": {
-    "privacy": "Her şey tarayıcında çalışır; girdiğin veri sunucuya gitmez.",
-    "source": "Kaynak kod"
+    "privacy": "Her şey tarayıcında çalışır; girdiğin veri sunucuya gitmez."
   },
   "reference": {
     "filter": "Tabloda ara…",
