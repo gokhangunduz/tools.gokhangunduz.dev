@@ -224,6 +224,7 @@ export default function FileTool({
           {error ? (
             <p
               role="alert"
+              data-tool-error
               className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
             >
               {error}

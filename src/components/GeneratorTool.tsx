@@ -134,6 +134,7 @@ export default function GeneratorTool({
         {error ? (
           <p
             role="alert"
+            data-tool-error
             className="min-h-24 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
           >
             {error}

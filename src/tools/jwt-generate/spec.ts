@@ -6,6 +6,7 @@ export const spec: TextToolSpec = {
     {
       id: "sign",
       label: { tr: "İmzala", en: "Sign" },
+      sampleOptions: { secret: "ornek-gizli-anahtar-en-az-32-karakter" },
       sample:
         '{\n  "sub": "42",\n  "name": "Gökhan Gündüz",\n  "role": "admin"\n}',
       placeholder: {

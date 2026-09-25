@@ -70,7 +70,7 @@ export default function Tool({ locale }: { locale: Locale }) {
 
         <div className="min-h-72 overflow-auto rounded-md border bg-muted/30 p-3 font-mono text-xs leading-relaxed">
           {parsed.error ? (
-            <p role="alert" className="text-destructive">
+            <p role="alert" data-tool-error className="text-destructive">
               {parsed.error}
             </p>
           ) : input.trim() ? (
