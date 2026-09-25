@@ -6,6 +6,21 @@ import { meta as aes } from "./aes/meta";
 import { meta as base64Text } from "./base64-text/meta";
 import { meta as bcrypt } from "./bcrypt/meta";
 import { meta as binaryText } from "./binary-text/meta";
+import { meta as bitwise } from "./bitwise/meta";
+import { meta as byteSize } from "./byte-size/meta";
+import { meta as chmod } from "./chmod/meta";
+import { meta as cron } from "./cron/meta";
+import { meta as duration } from "./duration/meta";
+import { meta as ieee754 } from "./ieee754/meta";
+import { meta as jsonPath } from "./jsonpath/meta";
+import { meta as jsonSchemaValidate } from "./json-schema-validate/meta";
+import { meta as numberBase } from "./number-base/meta";
+import { meta as regexTest } from "./regex-test/meta";
+import { meta as semver } from "./semver/meta";
+import { meta as timestamp } from "./timestamp/meta";
+import { meta as timezone } from "./timezone/meta";
+import { meta as validateTool } from "./validate/meta";
+import { meta as caseConvert } from "./case-convert/meta";
 import { meta as curlFetch } from "./curl-fetch/meta";
 import { meta as dockerRunCompose } from "./docker-run-compose/meta";
 import { meta as envJson } from "./env-json/meta";
@@ -19,13 +34,19 @@ import { meta as htmlJsx } from "./html-jsx/meta";
 import { meta as jsonCsv } from "./json-csv/meta";
 import { meta as jsonToml } from "./json-toml/meta";
 import { meta as jsonXml } from "./json-xml/meta";
+import { meta as jsonDiff } from "./json-diff/meta";
 import { meta as jsonToTypes } from "./json-to-types/meta";
 import { meta as jsonYaml } from "./json-yaml/meta";
 import { meta as jwtDecode } from "./jwt-decode/meta";
 import { meta as jwtGenerate } from "./jwt-generate/meta";
+import { meta as listCompare } from "./list-compare/meta";
 import { meta as markdownHtml } from "./markdown-html/meta";
 import { meta as minifyTool } from "./minify/meta";
 import { meta as sqlFormat } from "./sql-format/meta";
+import { meta as slugify } from "./slugify/meta";
+import { meta as textDiff } from "./text-diff/meta";
+import { meta as textLines } from "./text-lines/meta";
+import { meta as textStats } from "./text-stats/meta";
 import { meta as unicodeEscape } from "./unicode-escape/meta";
 import { meta as urlEncode } from "./url-encode/meta";
 import { meta as urlParse } from "./url-parse/meta";
@@ -68,6 +89,27 @@ export const TOOLS: ToolMeta[] = [
   curlFetch,
   dockerRunCompose,
   envJson,
+  caseConvert,
+  slugify,
+  textLines,
+  textStats,
+  textDiff,
+  jsonDiff,
+  listCompare,
+  regexTest,
+  jsonPath,
+  validateTool,
+  jsonSchemaValidate,
+  timestamp,
+  cron,
+  duration,
+  timezone,
+  numberBase,
+  bitwise,
+  ieee754,
+  byteSize,
+  chmod,
+  semver,
 ];
 
 export const TOOL_BY_ID: Map<string, ToolMeta> = new Map(

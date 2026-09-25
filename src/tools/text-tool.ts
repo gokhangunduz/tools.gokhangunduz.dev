@@ -1,4 +1,4 @@
-import type { Localized } from "@/i18n";
+import type { Locale, Localized } from "@/i18n";
 
 /**
  * The shape almost every tool here has: text in, text out, a handful of
@@ -50,7 +50,16 @@ export type ToolOption =
 export type Direction = {
   id: string;
   label: Localized;
-  run: (input: string, options: OptionValues) => string | Promise<string>;
+  /**
+   * The locale is passed through for the few tools whose *output* is language
+   * dependent — a collation order, a formatted date, a table of labels. Most
+   * ignore it.
+   */
+  run: (
+    input: string,
+    options: OptionValues,
+    locale: Locale,
+  ) => string | Promise<string>;
   /** Prefilled when the user asks for a sample, per direction. */
   sample?: string;
   /** Overrides the input box placeholder for this direction. */

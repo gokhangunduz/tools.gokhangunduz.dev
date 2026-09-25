@@ -88,7 +88,7 @@ export default function TextTool({
   } => {
     if (!input) return { output: "", error: null, promise: null };
     try {
-      const value = active.run(input, values);
+      const value = active.run(input, values, locale);
       return value instanceof Promise
         ? { output: "", error: null, promise: value }
         : { output: value, error: null, promise: null };
