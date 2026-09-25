@@ -46,6 +46,14 @@ import { meta as timestamp } from "./timestamp/meta";
 import { meta as timezone } from "./timezone/meta";
 import { meta as validateTool } from "./validate/meta";
 import { meta as caseConvert } from "./case-convert/meta";
+import { meta as charInspect } from "./char-inspect/meta";
+import { meta as conventionalCommit } from "./conventional-commit/meta";
+import { meta as gitignore } from "./gitignore/meta";
+import { meta as license } from "./license/meta";
+import { meta as readmeBadge } from "./readme-badge/meta";
+import { meta as invisibleChars } from "./invisible-chars/meta";
+import { meta as lineEndings } from "./line-endings/meta";
+import { meta as mojibake } from "./mojibake/meta";
 import { meta as curlFetch } from "./curl-fetch/meta";
 import { meta as dockerRunCompose } from "./docker-run-compose/meta";
 import { meta as envJson } from "./env-json/meta";
@@ -168,6 +176,14 @@ export const TOOLS: ToolMeta[] = [
   llmToken,
   jsonViewer,
   markdownEditor,
+  mojibake,
+  charInspect,
+  invisibleChars,
+  lineEndings,
+  gitignore,
+  license,
+  conventionalCommit,
+  readmeBadge,
 ];
 
 export const TOOL_BY_ID: Map<string, ToolMeta> = new Map(
