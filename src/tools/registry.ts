@@ -8,6 +8,18 @@ import { meta as bcrypt } from "./bcrypt/meta";
 import { meta as binaryText } from "./binary-text/meta";
 import { meta as bitwise } from "./bitwise/meta";
 import { meta as cidr } from "./cidr/meta";
+import { meta as asciiTable } from "./ascii-table/meta";
+import { meta as dockerCli } from "./docker-cli/meta";
+import { meta as exif } from "./exif/meta";
+import { meta as gitCommands } from "./git-commands/meta";
+import { meta as httpHeaders } from "./http-headers/meta";
+import { meta as regexCheatsheet } from "./regex-cheatsheet/meta";
+import { meta as sqlJoin } from "./sql-join/meta";
+import { meta as imageBase64 } from "./image-base64/meta";
+import { meta as imageConvert } from "./image-convert/meta";
+import { meta as qrGenerate } from "./qr-generate/meta";
+import { meta as qrRead } from "./qr-read/meta";
+import { meta as svgOptimize } from "./svg-optimize/meta";
 import { meta as dnsLookup } from "./dns-lookup/meta";
 import { meta as httpStatus } from "./http-status/meta";
 import { meta as ipConvert } from "./ip-convert/meta";
@@ -49,6 +61,10 @@ import { meta as jsonToml } from "./json-toml/meta";
 import { meta as jsonXml } from "./json-xml/meta";
 import { meta as jsonDiff } from "./json-diff/meta";
 import { meta as jsonToTypes } from "./json-to-types/meta";
+import { meta as jsonViewer } from "./json-viewer/meta";
+import { meta as llmToken } from "./llm-token/meta";
+import { meta as markdownEditor } from "./markdown-editor/meta";
+import { meta as slaUptime } from "./sla-uptime/meta";
 import { meta as jsonYaml } from "./json-yaml/meta";
 import { meta as jwtDecode } from "./jwt-decode/meta";
 import { meta as jwtGenerate } from "./jwt-generate/meta";
@@ -136,6 +152,22 @@ export const TOOLS: ToolMeta[] = [
   ipGeo,
   httpStatus,
   mimeType,
+  imageConvert,
+  imageBase64,
+  svgOptimize,
+  qrGenerate,
+  qrRead,
+  exif,
+  gitCommands,
+  regexCheatsheet,
+  sqlJoin,
+  dockerCli,
+  httpHeaders,
+  asciiTable,
+  slaUptime,
+  llmToken,
+  jsonViewer,
+  markdownEditor,
 ];
 
 export const TOOL_BY_ID: Map<string, ToolMeta> = new Map(

@@ -64,5 +64,15 @@
   "reference": {
     "filter": "Search the table…",
     "count": "{shown} of {total} rows"
+  },
+  "file": {
+    "choose": "Choose a file",
+    "drop": "Drop a file here, or click",
+    "working": "Working…"
+  },
+  "exif": {
+    "saveEdited": "Download edited",
+    "stripAll": "Strip all EXIF and download",
+    "note": "The photo is never uploaded; both reading and writing happen in this tab."
   }
 }
