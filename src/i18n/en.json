@@ -17,7 +17,9 @@
     "categories": "Categories",
     "openPalette": "Search tools",
     "toolCount": "{count} tools",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "menu": "Menu",
+    "close": "Close"
   },
   "tool": {
     "input": "Input",
@@ -27,23 +29,47 @@
     "copied": "Copied",
     "clear": "Clear",
     "paste": "Paste",
-    "sample": "Load sample",
+    "sample": "Sample",
     "download": "Download",
     "share": "Copy link",
     "shared": "Link copied",
     "swap": "Swap direction",
-    "related": "Related tools",
     "emptyOutput": "Output will appear here",
     "favorite": "Add to favourites",
     "unfavorite": "Remove from favourites",
     "generate": "Generate",
-    "networkWarning": "This tool queries a third-party service, so what you enter is sent to it."
+    "networkWarning": "This tool queries a third-party service, so what you enter is sent to it.",
+    "chars": "characters",
+    "preview": "Preview",
+    "networkShort": "Calls an external service",
+    "inputPlaceholder": "Type or paste text",
+    "useOutput": "Use output as input",
+    "openFile": "Open file",
+    "undo": "Undo",
+    "lines": "lines",
+    "bytes": "bytes",
+    "dropFile": "Drop the file",
+    "fileType": "This tool opens {types} files.",
+    "fileRead": "The file could not be read.",
+    "showValue": "Show",
+    "hideValue": "Hide",
+    "secretNotShared": "{name} is not added to the link",
+    "submit": "Look up",
+    "pending": "Looking up…",
+    "working": "Working…",
+    "goTo": "Line {line}:{column}",
+    "goToTitle": "Show in the input",
+    "networkTiny": "External service",
+    "networkService": "Sent to {service}",
+    "unexpectedError": "Something unexpected went wrong; check the input and try again."
   },
   "home": {
     "favorites": "Favourites",
     "recent": "Recently used",
     "noFavorites": "Star a tool and it stays here.",
-    "promise": "Nothing leaves your browser"
+    "promise": "Nothing leaves your browser",
+    "title": "Developer tools",
+    "subtitle": "Encoding, JSON, hashes, time, network and image tools. Everything runs in your browser; nothing you type leaves it."
   },
   "theme": {
     "label": "Theme",
@@ -64,18 +90,9 @@
   "footer": {
     "privacy": "Everything runs in your browser; your input never reaches a server."
   },
-  "reference": {
-    "filter": "Search the table…",
-    "count": "{shown} of {total} rows"
-  },
   "file": {
     "choose": "Choose a file",
     "drop": "Drop a file here, or click",
     "working": "Working…"
-  },
-  "exif": {
-    "saveEdited": "Download edited",
-    "stripAll": "Strip all EXIF and download",
-    "note": "The photo is never uploaded; both reading and writing happen in this tab."
   }
 }

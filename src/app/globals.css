@@ -1,9 +1,9 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/* Near-monochrome, Geist-flavoured. Depth comes from hairline borders and a
-   background step, not from elevation: on a page that is mostly a text box
-   and its result, a shadow would be the loudest thing on screen. */
+/* Neutral surfaces, with colour carried by the category: every tool takes
+   its category's hue as `--tint`, and badges, active states and focus use
+   it. The rest of the page stays quiet so the hue reads as wayfinding. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -31,14 +31,21 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --color-tint: var(--tint);
+  --color-tint-foreground: var(--tint-foreground);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px -4px rgb(0 0 0 / 0.06);
+  --shadow-lift:
+    0 2px 4px rgb(0 0 0 / 0.05), 0 12px 32px -8px rgb(0 0 0 / 0.12);
 }
 
 :root {
-  --background: #ffffff;
+  --background: #fafafa;
   --foreground: #0a0a0a;
 
   --card: #ffffff;
@@ -64,16 +71,27 @@
   --warning: #9e6300;
   --info: #0070f3;
 
-  --border: #dcdcdc;
+  --border: #e4e4e7;
   --input: #ebebeb;
   --ring: #0a0a0a;
+
+  --cat-encode: oklch(0.55 0.17 290);
+  --cat-data: oklch(0.55 0.17 240);
+  --cat-text: oklch(0.55 0.17 85);
+  --cat-crypto: oklch(0.55 0.17 40);
+  --cat-time: oklch(0.55 0.17 185);
+  --cat-network: oklch(0.55 0.17 150);
+  --cat-image: oklch(0.55 0.17 350);
+
+  --tint: oklch(0.55 0.2 275);
+  --tint-foreground: #ffffff;
 }
 
 .dark {
-  --background: #0a0a0a;
+  --background: #09090b;
   --foreground: #ededed;
 
-  --card: #0a0a0a;
+  --card: #111113;
   --card-foreground: #ededed;
   --popover: #131313;
   --popover-foreground: #ededed;
@@ -84,10 +102,10 @@
   --secondary: #171717;
   --secondary-foreground: #ededed;
 
-  --muted: #171717;
+  --muted: #18181b;
   --muted-foreground: #a1a1a1;
 
-  --accent: #1f1f1f;
+  --accent: #1f1f23;
   --accent-foreground: #ededed;
 
   --destructive: #e5484d;
@@ -96,9 +114,42 @@
   --warning: #f5a623;
   --info: #3291ff;
 
-  --border: #3a3a3a;
+  --border: #2a2a2e;
   --input: #2e2e2e;
   --ring: #d4d4d4;
+
+  --cat-encode: oklch(0.76 0.13 290);
+  --cat-data: oklch(0.76 0.13 240);
+  --cat-text: oklch(0.76 0.13 85);
+  --cat-crypto: oklch(0.76 0.13 40);
+  --cat-time: oklch(0.76 0.13 185);
+  --cat-network: oklch(0.76 0.13 150);
+  --cat-image: oklch(0.76 0.13 350);
+
+  --tint: oklch(0.74 0.15 275);
+  --tint-foreground: #0a0a0a;
+}
+
+.cat-encode {
+  --tint: var(--cat-encode);
+}
+.cat-data {
+  --tint: var(--cat-data);
+}
+.cat-text {
+  --tint: var(--cat-text);
+}
+.cat-crypto {
+  --tint: var(--cat-crypto);
+}
+.cat-time {
+  --tint: var(--cat-time);
+}
+.cat-network {
+  --tint: var(--cat-network);
+}
+.cat-image {
+  --tint: var(--cat-image);
 }
 
 @layer base {
@@ -155,7 +206,10 @@
 
 .markdown-preview h1,
 .markdown-preview h2,
-.markdown-preview h3 {
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
   margin: 1.5em 0 0.5em;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -169,6 +223,16 @@
 }
 .markdown-preview h3 {
   font-size: 1.05rem;
+}
+.markdown-preview h4 {
+  font-size: 1rem;
+}
+.markdown-preview h5 {
+  font-size: 0.875rem;
+}
+.markdown-preview h6 {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
 }
 
 .markdown-preview p,
@@ -191,8 +255,14 @@
 .markdown-preview li {
   margin: 0.25em 0;
 }
+.markdown-preview li:has(> input[type="checkbox"]),
+.markdown-preview li:has(> p > input[type="checkbox"]) {
+  list-style: none;
+}
 .markdown-preview li input[type="checkbox"] {
   margin-right: 0.4em;
+  accent-color: var(--foreground);
+  opacity: 1;
 }
 
 .markdown-preview a {
