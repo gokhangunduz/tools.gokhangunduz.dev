@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+
+export const dynamic = "force-static";
 import { LOCALES } from "@/i18n";
 import { TOOLS } from "@/tools/registry";
 
