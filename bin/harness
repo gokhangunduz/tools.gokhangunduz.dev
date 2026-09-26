@@ -1049,7 +1049,7 @@ function cmdCheckCommitMsg (argv) {
 
 function cmdDoctor () {
   const checks = [
-    ['node', ['--version'], true, 'required — runs this tool and the site (Node 22+)'],
+    ['node', ['--version'], true, 'required — runs this tool and the site (Node 24+, see .node-version)'],
     ['npm', ['--version'], true, 'required — installs the dependencies'],
     ['git', ['--version'], true, 'required'],
     ['zsh', ['--version'], true, 'required — the verify/ rungs are zsh scripts'],

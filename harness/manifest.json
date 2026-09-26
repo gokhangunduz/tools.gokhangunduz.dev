@@ -25,7 +25,7 @@
       "Tailwind v4 · shadcn/ui · Geist",
       "vitest (logic) · playwright (smoke)"
     ],
-    "node": "22",
+    "node": "24",
     "hosting": "Cloudflare Pages, built from Git — no server, no deploy script"
   },
   "roles": [
