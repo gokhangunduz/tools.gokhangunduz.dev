@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LOCALES, t, type Locale } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -8,10 +7,10 @@ import { cn } from "@/lib/utils";
 /**
  * Swaps the first path segment.
  *
- * A link rather than a button, so the other language is a real URL that can be
- * opened in a new tab and indexed. The fragment carries the input, and the
- * browser keeps it across a client navigation, so switching language mid-work
- * does not clear the box.
+ * A plain link rather than a client navigation: every locale shares the root
+ * layout that renders `<html>`, and re-rendering it drops the theme class the
+ * head script set, so a full load is what keeps the theme. The fragment carries
+ * the input and is appended on click, so switching language keeps the box.
  */
 export default function LocaleToggle({ locale }: { locale: Locale }) {
   const pathname = usePathname();
@@ -19,9 +18,13 @@ export default function LocaleToggle({ locale }: { locale: Locale }) {
   return (
     <div className="inline-flex items-center rounded-md border p-0.5 text-xs font-medium">
       {LOCALES.map((code) => (
-        <Link
+        <a
           key={code}
           href={swapLocale(pathname, code)}
+          onClick={(event) => {
+            event.currentTarget.href =
+              swapLocale(pathname, code) + window.location.hash;
+          }}
           hrefLang={code}
           aria-current={code === locale ? "true" : undefined}
           title={t(locale, `locale.${code}`)}
@@ -33,7 +36,7 @@ export default function LocaleToggle({ locale }: { locale: Locale }) {
           )}
         >
           {code}
-        </Link>
+        </a>
       ))}
     </div>
   );
