@@ -1,0 +1,155 @@
+{
+  "$comment": "Canonical label set. `bin/harness labels` creates or updates every one of these on the repo's remote, so a label is never invented ad hoc at issue-open time.",
+  "labels": [
+    {
+      "name": "type: feat",
+      "color": "a2eeef",
+      "description": "✨ A new capability a person can use — commit type `feat`"
+    },
+    {
+      "name": "type: fix",
+      "color": "d73a4a",
+      "description": "🐛 A defect a person could hit — commit type `fix`"
+    },
+    {
+      "name": "type: docs",
+      "color": "0075ca",
+      "description": "📝 Documentation and READMEs — commit type `docs`"
+    },
+    {
+      "name": "type: style",
+      "color": "c5def5",
+      "description": "🎨 Formatting only, no behaviour change — commit type `style`"
+    },
+    {
+      "name": "type: refactor",
+      "color": "fbca04",
+      "description": "♻️ Restructuring that neither fixes nor adds — commit type `refactor`"
+    },
+    {
+      "name": "type: test",
+      "color": "bfd4f2",
+      "description": "🧪 Tests — commit type `test`"
+    },
+    {
+      "name": "type: chore",
+      "color": "ededed",
+      "description": "🔧 Build config, dependencies, maintenance — commit type `chore`"
+    },
+    {
+      "name": "type: release",
+      "color": "5319e7",
+      "description": "🔖 Version bumps and release preparation — commit type `release`"
+    },
+    {
+      "name": "area: tools",
+      "color": "0e8a16",
+      "description": "A tool's logic, spec, component or metadata under src/tools/"
+    },
+    {
+      "name": "area: shell",
+      "color": "d4c5f9",
+      "description": "The site shell — layout, header, sidebar, palette, the runners"
+    },
+    {
+      "name": "area: i18n",
+      "color": "1d76db",
+      "description": "Turkish and English copy, src/i18n, Localized coverage"
+    },
+    {
+      "name": "area: design",
+      "color": "f9a8d4",
+      "description": "Tokens, category tints, Panel.tsx chrome, both themes"
+    },
+    {
+      "name": "area: a11y",
+      "color": "5319e7",
+      "description": "Keyboard, screen reader, contrast, focus"
+    },
+    {
+      "name": "area: perf",
+      "color": "fbca04",
+      "description": "Bundle size, lazy loading, main-thread work"
+    },
+    {
+      "name": "area: privacy",
+      "color": "1d3f8f",
+      "description": "The browser-only promise — requests, shared links, storage"
+    },
+    {
+      "name": "area: tests",
+      "color": "c2e0c6",
+      "description": "vitest suites, the smoke run, fixtures, flakes"
+    },
+    {
+      "name": "area: harness",
+      "color": "6f42c1",
+      "description": "The agent harness — contract, skills, roles, sync tool"
+    },
+    {
+      "name": "area: build",
+      "color": "8d5524",
+      "description": "next.config, the static export, dependencies"
+    },
+    {
+      "name": "area: ci",
+      "color": "586069",
+      "description": "GitHub Actions and the verification ladder in CI"
+    },
+    {
+      "name": "area: deploy",
+      "color": "c2a3ff",
+      "description": "Cloudflare Pages, what ships from the production branch"
+    },
+    {
+      "name": "area: docs",
+      "color": "0075ca",
+      "description": "README and repository documentation"
+    },
+    {
+      "name": "P0 critical",
+      "color": "b60205",
+      "description": "Input leaves the browser, or the site does not load — drop everything"
+    },
+    {
+      "name": "P1 high",
+      "color": "d93f0b",
+      "description": "A person hits this on a normal path — fix before the next merge to production"
+    },
+    {
+      "name": "P2 normal",
+      "color": "fbca04",
+      "description": "Real but survivable — schedule it"
+    },
+    {
+      "name": "P3 low",
+      "color": "eeeeee",
+      "description": "Worth doing when the area is open anyway"
+    },
+    {
+      "name": "status: needs-triage",
+      "color": "ffffff",
+      "description": "Filed, not yet judged — the default for a fresh issue"
+    },
+    {
+      "name": "status: ready",
+      "color": "0e8a16",
+      "description": "Triaged, scoped and ready to be picked up"
+    },
+    {
+      "name": "status: in-progress",
+      "color": "1d76db",
+      "description": "Someone or some agent is on it right now"
+    },
+    {
+      "name": "status: blocked",
+      "color": "b60205",
+      "description": "Cannot proceed until a named prerequisite lands"
+    },
+    {
+      "name": "agent-finding",
+      "color": "5319e7",
+      "description": "Found by an agent while working on something else, deliberately left unfixed to protect scope"
+    }
+  ]
+}

@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# The harness's per-working-copy state: the declared scope, the last ladder
+# stamp, handoffs. Never shared.
+.harness/
+
+# Claude Code runtime state under the otherwise-generated .claude/ tree.
+.claude/worktrees/
+.claude/launch.json
+.claude/scheduled_tasks.lock

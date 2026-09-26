@@ -1,0 +1,56 @@
+---
+name: security
+description: Security inside the browser tools of tools.gokhangunduz.dev — secrets as input (keys, tokens, passwords), WebCrypto instead of hand-rolled crypto, secure randomness, keeping secrets out of shared links and storage, and rendering untrusted input (Markdown, SVG, HTML) without XSS. Load before a tool handles a secret, generates one, or renders input as markup.
+---
+
+# Security
+
+Visitors paste real secrets into these tools: production JWTs, private keys,
+API tokens. The page must not leak them, and a tool that generates or verifies
+one must do it correctly.
+
+## Secrets as input
+
+- An option holding a key, password or token is `secret: true` (never written
+  into the shared link) and usually `sensitive: true` (masked, not
+  autocompleted).
+- A tool whose *main input* is a secret sets `share: false` on its spec: the
+  input stays out of the URL fragment, and therefore out of history and out of
+  every link copied from the address bar.
+- Never `console.log` input. Never put it in an error message that could be
+  copied into an issue.
+- Nothing is sent anywhere — see `privacy-manager`.
+
+## Crypto
+
+- Use WebCrypto (`crypto.subtle`) or a vetted library already in the project
+  (`jose` for JOSE/JWT, `hash-wasm` for hashes WebCrypto lacks). Never
+  hand-roll a primitive.
+- Randomness for anything secret — passwords, keys, UUIDv4, salts — comes from
+  `crypto.getRandomValues` / `crypto.randomUUID`. `Math.random` is a defect.
+- Avoid modulo bias when mapping random bytes onto an alphabet: rejection
+  sampling, not `byte % n`.
+- Verification must fail closed: a JWT with `alg: none`, an unknown algorithm or
+  a signature that does not verify is reported as unverified, loudly — never
+  shown as valid.
+- `crypto.subtle` is async; the spec's `run` returns a promise, which the
+  runner handles.
+
+## Rendering untrusted input
+
+- Output goes into a `<textarea>` or as text content by default — that is inert.
+- Rendering input as markup (Markdown preview, an SVG preview) requires
+  sanitising first: no `<script>`, no `on*` attributes, no `javascript:` or
+  `data:` URLs in links (including entity-encoded forms like `&#106;avascript:`),
+  no `<iframe>`/`<object>`/`<embed>`. `markdown-editor` has the sanitiser and
+  its tests; reuse it rather than writing another.
+- SVG shown as a preview is loaded as an `<img>` (scripts do not run) rather
+  than inlined into the DOM.
+- `dangerouslySetInnerHTML` only with sanitised output, and a test that feeds
+  the sanitiser the attacks above.
+
+## Reviewing
+
+A security finding meets the same bar as any other: a concrete input that leaks
+or executes, reproduced. "This could be XSS" without a payload that fires is a
+suspicion, stated as one.

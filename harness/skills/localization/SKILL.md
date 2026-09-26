@@ -1,0 +1,65 @@
+---
+name: localization
+description: Turkish and English on tools.gokhangunduz.dev — shell strings in src/i18n versus a tool's Localized copy, t() and pick(), which developer terms stay in English inside Turkish copy, locale-dependent output, and what verify/invariants.sh checks. Load before writing or changing any visible text.
+---
+
+# Localization
+
+Two languages, both first-class, Turkish the default (`/` sends a visitor to
+`/tr` unless their browser prefers English). A string that exists in one
+language only is a bug, not a to-do.
+
+## Where a string lives
+
+| Kind | Where | How it renders |
+|---|---|---|
+| shell text (header, footer, buttons every tool repeats) | `src/i18n/tr.json` and `src/i18n/en.json`, same key in both | `t(locale, "section.key", { vars })` |
+| tool text (name, blurb, keywords, labels, placeholders, errors) | a `Localized` (`{ tr, en }`) in the tool's own files | `pick(locale, value)` |
+| a block of copy in a component | `const COPY = { … } satisfies Record<string, Localized>` | `pick(locale, COPY.label)` |
+| an error for the visitor | `new ToolError({ tr, en }, …)` | the runner shows it |
+
+`tr.json` is the source of truth for the shape; `en.json` is type-checked
+against it. `verify/invariants.sh` additionally fails on:
+
+- a key present in one JSON file only, or an empty value in either;
+- an object literal in `src/` with a `tr` property and no `en` (or the reverse),
+  or with one side an empty string while the other is not.
+
+## Turkish copy
+
+- **Keep the English developer terms Turkish developers actually use** —
+  *encode*, *decode*, *hash*, *token*, *payload*, *header*, *regex*,
+  *timestamp*, *UUID*, *JSON*, *URL*, *cron*, *commit*. Nobody searches for
+  "kodla/çöz" alone; put both in `keywords`, and write the term the reader
+  would say in the sentence: "Metni Base64'e encode et". The sentence around it
+  is natural Turkish.
+- Suffixes attach with an apostrophe to a foreign term or an acronym:
+  *JSON'u*, *URL'yi*, *Base64'e*, *JWT'nin*. Get the vowel harmony right for how
+  the term is *pronounced* (*JSON'u* — "ceyson", *SQL'i* — "es-ku-el").
+- Sentence case for labels and buttons ("Örnek yükle", not "Örnek Yükle").
+- Informal second person, as the rest of the site ("yapıştır", "seç").
+- Turkish runs longer. Check that a label still fits.
+
+## English copy
+
+Plain, short, sentence case, no marketing. "Turn text into Base64 and back."
+
+## Locale-dependent output
+
+The `locale` passed to `run` is for the few tools whose *output* depends on the
+language — a formatted date, a collation, a label in a table. Use
+`toLocaleString(locale, …)` / `Intl.*` with the page's locale, never the
+machine's default, and never during a server render where it would differ from
+the browser (a hydration mismatch).
+
+Turkish casing is special: `"i".toLocaleUpperCase("tr")` is `"İ"`, and
+`"I".toLocaleLowerCase("tr")` is `"ı"`. A case-conversion or search that must be
+language-neutral uses `toUpperCase()`/`toLowerCase()`; one that must be correct
+for Turkish uses the locale form deliberately — and has a test for *i/İ/ı/I*.
+
+## Adding a language
+
+Not a small change: a third JSON file, `LOCALES`, `generateStaticParams`,
+`public/index.html`, the sitemap, every `Localized` in every tool (the type
+`Record<Locale, string>` will list them all as errors). Plan it as its own
+task.

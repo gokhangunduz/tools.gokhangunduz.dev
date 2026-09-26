@@ -1,0 +1,38 @@
+---
+description: Audit the whole repository with parallel read-only reviewers, one per area, converging until every area reports clean.
+argument-hint: "[area or focus, optional]"
+---
+
+Audit the repository the way `/review` audits a single diff — but across the
+whole tree, in parallel, and to convergence. `/review` is for the change in
+front of you; this is for "is the repository sound", which no single reading
+covers.
+
+1. **Split the repo into areas that don't overlap.** For this project the
+   natural split is: the tools (`src/tools/`, split further by category if it
+   is large), the shell and runners (`src/components/`, `src/app/`, `src/lib/`,
+   `src/i18n/`), the harness and its generated projections (`harness/`,
+   `.claude/`, `.cursor/`, `AGENTS.md`), and the ladder and scripts (`verify/`,
+   `bin/`, `scripts/`, `.github/`). If `$ARGUMENTS` names an area or a concern
+   (privacy, accessibility, performance), scope the audit to that instead and
+   give it to the matching specialist.
+
+2. **One read-only reviewer per area, all at once.** Give each the
+   `review-manager` bar: reproduce before reporting, a concrete failure
+   scenario for every finding, drop what cannot be reproduced. They investigate
+   and report; they do not edit.
+
+3. **Collect, verify, rank.** Merge the reports, drop duplicates, and
+   **re-check any finding you doubt yourself** — a reviewer working from stale
+   knowledge will assert things that are not true (a Next.js API that "does not
+   exist", a browser API that is "unsupported"); confirm with a live command or
+   the guide in `node_modules/next/dist/docs/` before acting. Rank by how badly
+   each burns a visitor.
+
+4. **Fix, then converge.** Fix the confirmed findings (each in its own declared
+   scope, its own commit), then run the reviewers again on the areas that
+   changed. Repeat until every area reports clean.
+
+Scale to the ask: a quick "is this sound" is one round of a few reviewers; "make
+it flawless" is fix-and-re-review until the findings stop. Say plainly when an
+area is clean rather than manufacturing nits to justify another round.

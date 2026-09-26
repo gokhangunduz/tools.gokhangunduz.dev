@@ -1,0 +1,59 @@
+---
+name: accessibility-manager
+description: Web accessibility for tools.gokhangunduz.dev — keyboard reachability and focus, accessible names in Turkish and English, live regions for results and errors, contrast of tokens and category tints in both themes, zoom and reduced motion. Load when auditing or fixing how a page works for assistive technology.
+---
+
+# Accessibility manager
+
+A developer tool is used for long stretches, often from the keyboard, sometimes
+at high zoom or with a screen reader. The bar is that every tool can be used
+start to finish without a mouse and without sight.
+
+**Reasoning tier: high.** Whether a page is usable without a mouse or without
+sight does not decompose into rules.
+
+## The checks, in order
+
+1. **Keyboard.** Tab from the top of a tool page to the output: every control
+   is reached, in visual order, with a visible focus ring. Enter/Space activate
+   buttons; arrow keys move within `Segmented`. The command palette opens and
+   closes from the keyboard, traps focus while open and returns it on close
+   (Radix dialogs do this — a hand-rolled overlay usually does not).
+2. **Names.** Every control has an accessible name in the page's language:
+   visible `<label htmlFor>` for inputs, `aria-label` from `t()` or a tool's
+   `Localized` for icon-only buttons (copy, download, swap, clear, favourite,
+   theme, language). A hard-coded English `aria-label` on a Turkish page is a
+   bug. `<html lang>` is the locale.
+3. **Announcements.** Results that update while typing and error lines must
+   reach a screen reader without moving focus: `role="status"` / `aria-live=
+   "polite"` for results and headlines, `role="alert"` sparingly. The error line
+   carries `data-tool-error` for the smoke run — keep it.
+4. **Contrast.** Text on its ground meets WCAG AA (4.5:1 body, 3:1 large and UI)
+   in light *and* dark — check `text-muted-foreground` on `bg-muted`, the
+   category tints on `bg-tint/15`, and focus rings on cards. Colour is never the
+   only carrier of meaning: a diff marks added/removed with a sign, a tone with a
+   word or icon.
+5. **Zoom and reflow.** At 200% zoom and at 320 px width the input and output are
+   still usable; panes scroll, nothing is clipped behind the header.
+6. **Motion.** Under `prefers-reduced-motion: reduce`, transitions and
+   animations are removed (`motion-safe:` / `motion-reduce:` variants), not
+   merely shortened.
+
+## Tools for checking
+
+- The browser's accessibility tree panel for names and roles.
+- A screen reader pass (VoiceOver: Cmd+F5) over one tool per runner type —
+  TextTool, DualTool, FileTool, GeneratorTool — covers most of the site, since
+  the runners are shared.
+- Contrast: compute from the token values in `globals.css`, both blocks.
+
+## Fixing
+
+Most fixes belong in a runner or `Panel.tsx`, where one change fixes every tool.
+Prefer that over patching one tool. A fix inside a tool's own component goes to
+its writer with a precise instruction.
+
+## Reporting
+
+As `review-manager` does: page, assistive path, what fails, how you reproduced
+it, the smallest fix. Say plainly when a page passes.

@@ -1,0 +1,39 @@
+name: Feature
+description: A new tool or capability for the person using the site.
+title: "feat: <one line, imperative>"
+labels: ["type: feat", "status: needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What someone cannot do today, and why that costs them something. Not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should exist. Describe the behaviour a person would see.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: The paths this should touch, and — just as important — what it must not touch.
+      placeholder: |
+        In:  src/tools/xml-format, registry.ts, components.ts
+        Out: the TextTool runner, other tools
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: The observable outcome, plus the verification rung that proves it.
+      placeholder: |
+        /tr/xml-format and /en/xml-format format the sample without an error;
+        verify/tests.sh xml-format and verify/smoke.sh cover it.
+    validations:
+      required: true

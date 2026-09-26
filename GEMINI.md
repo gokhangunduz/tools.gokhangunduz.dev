@@ -4,8 +4,6 @@
 
 **Read [`AGENTS.md`](AGENTS.md).** It is the single working contract for this repository —
 scope discipline, the verification ladder, the invariants, and the commit convention.
-This file exists only because Claude Code looks for it by name; it deliberately holds no rules of its own.
+This file exists only because the Gemini CLI looks for it by name; it deliberately holds no rules of its own.
 
 Specialist briefs live in `harness/roles/`, their skills in `harness/skills/`.
-
-@AGENTS.md

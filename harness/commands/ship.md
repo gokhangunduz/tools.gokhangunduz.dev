@@ -1,0 +1,29 @@
+---
+description: Finish the current task — full ladder, scope check, then a conventional commit.
+---
+
+Close out the declared task.
+
+1. `zsh verify/all.sh`. If any rung fails, stop and report it; do not commit.
+2. `bin/harness scope --show` — confirm the diff stayed inside it. Anything that
+   spilled either belongs to this task or should be reverted and filed.
+3. Review the diff yourself once, with the `review-manager` bar: would you sign
+   it? Could anything the visitor types now leave the browser?
+4. Stage the files this task changed by name — never `git add -A` over a tree
+   you did not create.
+5. Commit as `<type>(<scope>): <emoji> <subject>` — imperative, under 72
+   characters, no trailing period. **No AI co-author or attribution trailer**;
+   the local git user is the sole author. The `commit-msg` hook enforces both.
+6. `bin/harness done`.
+7. Report five lines and stop:
+
+```text
+Did:      …
+Changed:  …
+Verified: …
+Found:    …
+Left:     …
+```
+
+Do not push, tag or open a PR unless asked. What reaches the production branch
+is deployed by Cloudflare Pages without another step.

@@ -1,0 +1,234 @@
+{
+  "$comment": "Single source of truth for the agent harness. Edit this and the files under harness/, then run `bin/harness sync`. Never edit a generated file.",
+  "harness": {
+    "name": "tools-harness",
+    "version": "0.1.0",
+    "description": "The agent harness for tools.gokhangunduz.dev, adapted from harnesswift: nine specialists and a web verification ladder, generated into every vendor's format.",
+    "author": {
+      "name": "Gökhan Gündüz",
+      "email": "me@gokhangunduz.dev"
+    },
+    "template": "https://github.com/gokhangunduz/harnesswift"
+  },
+  "project": {
+    "name": "tools.gokhangunduz.dev",
+    "displayName": "tools.gokhangunduz.dev",
+    "url": "https://tools.gokhangunduz.dev",
+    "languages": [
+      "tr",
+      "en"
+    ],
+    "defaultLanguage": "tr",
+    "stack": [
+      "Next.js 16 (App Router, `output: \"export\"` → `out/`)",
+      "React 19 · TypeScript (strict)",
+      "Tailwind v4 · shadcn/ui · Geist",
+      "vitest (logic) · playwright (smoke)"
+    ],
+    "node": "22",
+    "hosting": "Cloudflare Pages, built from Git — no server, no deploy script"
+  },
+  "roles": [
+    {
+      "name": "web-developer",
+      "title": "Web developer",
+      "description": "Writes and changes the site's code — Next.js App Router, React client components, TypeScript, the tool contracts (TextTool, DualTool, FileTool, GeneratorTool) and the shell around them. Use for any feature work, refactor, type error or build failure under src/.",
+      "skill": "web-developer",
+      "readOnly": false,
+      "globs": [
+        "src/**",
+        "public/**",
+        "next.config.ts",
+        "tsconfig.json",
+        "eslint.config.mjs",
+        "vitest.config.ts",
+        "postcss.config.mjs",
+        "package.json"
+      ],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "Writes production code against a Next.js version newer than most training data; a wrong assumption about an API is expensive to unwind.",
+      "owns": "`src/` — Next.js, React, TypeScript, the tool contracts and the shell"
+    },
+    {
+      "name": "tool-author",
+      "title": "Tool author",
+      "description": "Adds a new tool to tools.gokhangunduz.dev end to end — logic, tests, metadata, icon, registration — following the add-tool skill. Use for \"add an X tool\" requests.",
+      "skill": "add-tool",
+      "readOnly": false,
+      "globs": [
+        "src/tools/**"
+      ],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "The logic has to be right on the inputs a naive implementation gets wrong, and the tests have to prove it.",
+      "owns": "One new tool end to end: logic, tests, metadata, registration"
+    },
+    {
+      "name": "ui-ux-designer",
+      "title": "UI/UX designer",
+      "description": "Designs and judges the interface — the Panel.tsx chrome, the colour tokens and category tints, layout that fills the viewport without page scroll, states, both themes and both languages. Use when designing or judging a tool page, a component or the shell.",
+      "skill": "ui-ux-designer",
+      "readOnly": false,
+      "globs": [
+        "src/components/**",
+        "src/app/globals.css",
+        "src/app/[locale]/**"
+      ],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "Design judgment does not decompose into rules; the skill can only describe what good looks like.",
+      "owns": "The chrome, the tokens, the category tints, layout in both themes"
+    },
+    {
+      "name": "review-manager",
+      "title": "Review manager",
+      "description": "Reviews a diff or a file for correctness defects — input leaving the browser, hydration and effect bugs, broken invariants, wrong logic on edge-case input. Reports findings with a concrete failure scenario; never edits. Use before handing work back.",
+      "skill": "review-manager",
+      "readOnly": true,
+      "globs": [],
+      "claude": {
+        "tools": "Read, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "Finding a real defect and refusing a plausible one is the hardest reasoning here.",
+      "owns": "Correctness review — reproduced findings only, never style opinions"
+    },
+    {
+      "name": "test-manager",
+      "title": "Test manager",
+      "description": "Designs tests and runs the verification ladder — vitest suites for the logic modules, the static build, the browser smoke run over out/ — and diagnoses a failing rung. Reports what passed, what failed and why; never edits app code. Use to verify a change or chase a flaky failure.",
+      "skill": "test-manager",
+      "readOnly": true,
+      "globs": [
+        "src/**/*.test.ts",
+        "scripts/**",
+        "verify/**"
+      ],
+      "claude": {
+        "tools": "Read, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "Diagnosis is the job: a prerender or hydration failure surfaces far from its cause.",
+      "owns": "The verification ladder, vitest design, the browser smoke run"
+    },
+    {
+      "name": "project-manager",
+      "title": "Project manager",
+      "description": "The integrity of the rules and the queue — whether every rule in AGENTS.md still has a gate, what the open findings and issues are, whether the README still describes the site. Use when asked what state the project is in, or to triage findings.",
+      "skill": "project-manager",
+      "readOnly": false,
+      "globs": [
+        "README.md",
+        "FINDINGS.md"
+      ],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "Deciding which of two disagreeing facts is true is entirely judgment.",
+      "owns": "The README, the findings queue, and whether the rules still have gates"
+    },
+    {
+      "name": "accessibility-manager",
+      "title": "Accessibility manager",
+      "description": "Audits and fixes accessibility on the web — keyboard reachability and focus order, accessible names in both languages, contrast in both themes, live regions for results and errors, reduced motion. Use when checking or fixing how a page works for assistive technology.",
+      "skill": "accessibility-manager",
+      "readOnly": false,
+      "globs": [],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "Whether a page is usable without a mouse or without sight does not decompose into rules.",
+      "owns": "Keyboard, screen reader, contrast, focus — cross-cutting"
+    },
+    {
+      "name": "performance-manager",
+      "title": "Performance manager",
+      "description": "Diagnoses and fixes performance on the web — first-load JS per route, what leaked into the shared bundle, lazy tool imports, main-thread work on large input, workers, input latency. Measures before claiming. Use when a page feels slow, a bundle grew, or a tool freezes on big input.",
+      "skill": "performance-manager",
+      "readOnly": false,
+      "globs": [],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "A bundle report and a profile surface symptoms far from their cause; reading them is judgment.",
+      "owns": "Bundle size, lazy loading, main-thread work — cross-cutting"
+    },
+    {
+      "name": "privacy-manager",
+      "title": "Privacy manager",
+      "description": "Guards the site's promise that nothing typed leaves the browser — network requests a tool makes, the network flag and warning, secrets kept out of shared links and storage, third-party origins, what the footer and README claim. Use before adding a dependency that fetches, a tool that calls an API, or anything that stores input.",
+      "skill": "privacy-manager",
+      "readOnly": false,
+      "globs": [],
+      "claude": {
+        "tools": "Read, Write, Edit, Bash, Glob, Grep",
+        "model": "opus"
+      },
+      "reasoning": "high",
+      "reasoningNote": "A wrong claim here is a false statement to every visitor who trusted it.",
+      "owns": "The browser-only promise: what leaves the page, and what says so"
+    }
+  ],
+  "commands": [
+    "focus",
+    "verify",
+    "review",
+    "audit",
+    "ship",
+    "state",
+    "handoff"
+  ],
+  "targets": {
+    "agents-md": {
+      "path": "AGENTS.md",
+      "enabled": true
+    },
+    "claude-code": {
+      "enabled": true,
+      "permissions": {
+        "allow": [
+          "Bash(npm run build)",
+          "Bash(npm run lint)",
+          "Bash(npm run verify)",
+          "Bash(npm test)",
+          "Bash(npm test -- *)",
+          "Bash(npx vitest run*)",
+          "Bash(npx tsc --noEmit)",
+          "Bash(npx shadcn@latest add *)",
+          "Bash(zsh verify/*)",
+          "Bash(bin/harness scope*)",
+          "Bash(bin/harness done)",
+          "Bash(bin/harness sync*)",
+          "Bash(bin/harness doctor)"
+        ]
+      }
+    },
+    "cursor": {
+      "enabled": true
+    },
+    "copilot": {
+      "enabled": true
+    },
+    "gemini": {
+      "enabled": true
+    }
+  }
+}

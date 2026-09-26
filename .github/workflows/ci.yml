@@ -1,0 +1,54 @@
+# The whole verification ladder on every push to main and every pull request.
+# Cloudflare Pages builds and deploys the site itself from Git, so there is no
+# deploy job here: this workflow only says whether what is about to ship holds.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the commit-message check reads the branch's history
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - run: npm ci
+
+      - name: Install the smoke run's browser
+        run: npx playwright install --with-deps chromium
+
+      # harness, invariants, scope (inert: .harness/ is per-working-copy),
+      # typecheck, tests, lint, build, smoke.
+      - name: Verification ladder
+        run: zsh verify/all.sh
+
+      - name: Commit messages follow the convention
+        if: github.event_name == 'pull_request'
+        run: |
+          # Every commit on the branch, not just the tip — a single bad message
+          # is still in the history after the merge. --no-merges skips the merge
+          # commit a pull_request checkout synthesises, which is not anyone's message.
+          git log --no-merges --format=%H "origin/${{ github.base_ref }}..HEAD" | while read -r sha; do
+            git log -1 --format=%B "$sha" > "$RUNNER_TEMP/msg"
+            node bin/harness check-commit-msg "$RUNNER_TEMP/msg" || exit 1
+          done

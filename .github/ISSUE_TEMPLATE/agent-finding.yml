@@ -1,0 +1,68 @@
+name: Agent finding
+description: Something an agent noticed while working on an unrelated task, deliberately left unfixed to protect scope.
+title: "fix: <one line, imperative>"
+labels: ["agent-finding", "status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Filed by `bin/harness note`. Every field is required, and the finding must
+        have been **reproduced** — an unverified guess costs the reader a full
+        investigation and devalues every real finding next to it.
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: The exact place, as `path/to/file.ts:42`.
+      placeholder: src/tools/url-encode/logic.ts:31
+    validations:
+      required: true
+  - type: textarea
+    id: defect
+    attributes:
+      label: The defect
+      description: One sentence. What is wrong, not what you would prefer.
+    validations:
+      required: true
+  - type: textarea
+    id: failure
+    attributes:
+      label: Failure scenario
+      description: Concrete input or state → the path taken → the wrong result. If you cannot write this, close the issue instead of filing it.
+      placeholder: |
+        Decoding a lone "%" on /en/url-encode calls decodeURIComponent, which
+        throws a URIError that is not a ToolError, so the page shows
+        "URI malformed" in English on the Turkish page too.
+    validations:
+      required: true
+  - type: input
+    id: repro
+    attributes:
+      label: Reproduced with
+      description: The command you actually ran to make it happen. Reading the code is not reproduction — if you did not run something, close this and say "suspected, unverified" instead.
+      placeholder: zsh verify/tests.sh url-encode
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Output
+      description: What that command printed. Paste it, do not paraphrase.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Suggested fix
+      description: The smallest change that would resolve it, and the verification rung that would prove it.
+    validations:
+      required: true
+  - type: input
+    id: found-while
+    attributes:
+      label: Found while
+      description: The scope that was declared when this surfaced — the reason it was not fixed on the spot.
+      placeholder: add the xml formatter
+    validations:
+      required: true

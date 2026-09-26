@@ -1,0 +1,49 @@
+name: Bug
+description: Something a person can hit that behaves wrongly.
+title: "fix: <one line, imperative>"
+labels: ["type: fix", "status: needs-triage"]
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What should happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happens instead. Include the exact message or a screenshot.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered, from opening the page. Include the input, or a shared link. A bug nobody can reproduce cannot be fixed or verified.
+      placeholder: |
+        1. Open /tr/base64-text
+        2. Choose Decode and paste "aGVsbG8"
+        3. Read the output
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and version, OS, page language, theme.
+      placeholder: Safari 26 · macOS 26 · TR · dark
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0 critical — input sent somewhere, or the site does not load
+        - P1 high — hit on a normal path
+        - P2 normal — real but survivable
+        - P3 low — cosmetic or rare
+    validations:
+      required: true
