@@ -3,29 +3,14 @@ import type { Category, CategoryId } from "./types";
 /** Display order on the home page, chosen by how often each group is reached for. */
 export const CATEGORIES: Category[] = [
   {
+    id: "data",
+    name: { tr: "JSON & veri", en: "JSON & data" },
+    icon: "braces",
+  },
+  {
     id: "encode",
-    name: { tr: "Kodlama", en: "Encoding" },
+    name: { tr: "Encode & decode", en: "Encode & decode" },
     icon: "binary",
-  },
-  {
-    id: "crypto",
-    name: { tr: "Hash & Kripto", en: "Hash & crypto" },
-    icon: "fingerprint",
-  },
-  {
-    id: "jwt",
-    name: { tr: "JWT", en: "JWT" },
-    icon: "keyRound",
-  },
-  {
-    id: "format",
-    name: { tr: "Biçimlendirme", en: "Formatting" },
-    icon: "fileCode",
-  },
-  {
-    id: "convert",
-    name: { tr: "Dönüştürme", en: "Conversion" },
-    icon: "shuffle",
   },
   {
     id: "text",
@@ -33,9 +18,9 @@ export const CATEGORIES: Category[] = [
     icon: "type",
   },
   {
-    id: "validate",
-    name: { tr: "Test & Doğrulama", en: "Testing & validation" },
-    icon: "squareCheck",
+    id: "crypto",
+    name: { tr: "Güvenlik & ID", en: "Security & IDs" },
+    icon: "shieldCheck",
   },
   {
     id: "time",
@@ -43,34 +28,14 @@ export const CATEGORIES: Category[] = [
     icon: "calendarClock",
   },
   {
-    id: "number",
-    name: { tr: "Sayı", en: "Numbers" },
-    icon: "hash",
-  },
-  {
     id: "network",
     name: { tr: "Ağ", en: "Network" },
     icon: "network",
   },
   {
-    id: "generate",
-    name: { tr: "Üretici", en: "Generators" },
-    icon: "braces",
-  },
-  {
     id: "image",
     name: { tr: "Görsel", en: "Images" },
     icon: "image",
-  },
-  {
-    id: "reference",
-    name: { tr: "Başvuru", en: "Reference" },
-    icon: "table",
-  },
-  {
-    id: "playground",
-    name: { tr: "Deneme alanı", en: "Playground" },
-    icon: "playCircle",
   },
 ];
 

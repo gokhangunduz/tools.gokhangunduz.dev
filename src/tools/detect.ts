@@ -47,11 +47,6 @@ const RULES: Rule[] = [
       ),
   },
   {
-    toolId: "bcrypt",
-    label: { tr: "bcrypt hash'i", en: "a bcrypt hash" },
-    test: (value) => /^\$2[aby]?\$\d{2}\$/.test(value),
-  },
-  {
     toolId: "timestamp",
     label: { tr: "zaman damgası", en: "a timestamp" },
     test: (value) =>
@@ -82,11 +77,6 @@ const RULES: Rule[] = [
     },
   },
   {
-    toolId: "user-agent",
-    label: { tr: "User-Agent", en: "a User-Agent" },
-    test: (value) => /^Mozilla\/\d/.test(value),
-  },
-  {
     toolId: "cron",
     label: { tr: "cron ifadesi", en: "a cron expression" },
     test: (value) =>
@@ -95,14 +85,24 @@ const RULES: Rule[] = [
       !/[a-z]{4}/i.test(value),
   },
   {
-    toolId: "svg-optimize",
-    label: { tr: "SVG", en: "an SVG" },
-    test: (value) => /^<svg[\s>]/i.test(value),
+    toolId: "sql-format",
+    label: { tr: "SQL", en: "SQL" },
+    test: (value) =>
+      /^(select\s[\s\S]*?\sfrom\s+\S|insert\s+into\s+\S|update\s+\S+\s+set\s+\S|delete\s+from\s+\S|create\s+(or\s+replace\s+)?(temporary\s+)?(table|view|index|unique\s+index|function|procedure|trigger|schema|database)\s+\S|alter\s+table\s+\S|drop\s+(table|view|index|schema|database)\s+\S|with\s+(recursive\s+)?\w+\s+as\s*\()/i.test(
+        value,
+      ),
   },
   {
-    toolId: "html-jsx",
-    label: { tr: "HTML", en: "HTML" },
-    test: (value) => /^<[a-z][\s\S]*>/i.test(value),
+    toolId: "json-yaml",
+    label: { tr: "YAML", en: "YAML" },
+    test: (value) => {
+      const [first, ...rest] = value.split(/\r?\n/);
+      if (rest.length === 0) return false;
+      return (
+        /^---\s*$/.test(first) ||
+        /^(- )?["']?[\w][\w .-]*["']?:(\s|$)/.test(first)
+      );
+    },
   },
   {
     toolId: "base64-text",
@@ -114,12 +114,6 @@ const RULES: Rule[] = [
       // A string of only hex digits is far more likely to be bytes than a
       // base64 payload that happens to avoid every other letter.
       !/^[0-9a-f]+$/i.test(value),
-  },
-  {
-    toolId: "hex-text",
-    label: { tr: "onaltılık bayt dizisi", en: "hex bytes" },
-    test: (value) =>
-      value.length >= 8 && value.length % 2 === 0 && /^[0-9a-f]+$/i.test(value),
   },
 ];
 
