@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n";
 import { ToolError } from "../text-tool";
 
 /**
@@ -5,17 +6,24 @@ import { ToolError } from "../text-tool";
  *
  * Decoding is deliberately separate from verifying: a token can be read
  * without any key, and pretending otherwise is why people paste production
- * tokens into sites that ask for the secret. The key field is empty by
- * default, and what it adds is a single line at the end.
- *
- * Timestamps are printed as dates because `1789432000` tells nobody whether
- * the token has expired, which is the question being asked.
+ * tokens into sites that ask for the secret. A failed verification never
+ * hides what the token says.
  */
-const TIME_CLAIMS = new Set(["exp", "iat", "nbf", "auth_time", "updated_at"]);
+export const TIME_CLAIMS = ["exp", "iat", "nbf", "auth_time", "updated_at"];
 
-type Parts = { header: unknown; payload: unknown; raw: string[] };
+export const SAMPLE_KEY = "demo-secret-demo-secret-demo-1234";
+export const SAMPLE_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkfDtmtoYW4gR8O8bmTDvHoiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MTkyNDk5MTk5OX0.6gNBKpFpaT3GWwYFe3BadlcR8oRfkX8BltnSZSm2tXs";
 
-function decodeSegment(segment: string, which: string): unknown {
+type Claims = Record<string, unknown>;
+
+export type Decoded = {
+  header: Claims;
+  payload: Claims;
+  segments: [string, string, string];
+};
+
+function decodeSegment(segment: string, which: string): Claims {
   let json: string;
   try {
     const normalized = segment.replace(/-/g, "+").replace(/_/g, "/");
@@ -24,7 +32,7 @@ function decodeSegment(segment: string, which: string): unknown {
       "=",
     );
     const binary = atob(padded);
-    json = new TextDecoder().decode(
+    json = new TextDecoder("utf-8", { fatal: true }).decode(
       Uint8Array.from(binary, (character) => character.charCodeAt(0)),
     );
   } catch {
@@ -34,130 +42,170 @@ function decodeSegment(segment: string, which: string): unknown {
     });
   }
 
+  let value: unknown;
   try {
-    return JSON.parse(json);
+    value = JSON.parse(json);
   } catch {
     throw new ToolError({
       tr: `Token'ın ${which} bölümü JSON değil.`,
       en: `The token's ${which} is not JSON.`,
     });
   }
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new ToolError({
+      tr: `Token'ın ${which} bölümü bir JSON nesnesi değil.`,
+      en: `The token's ${which} is not a JSON object.`,
+    });
+  }
+  return value as Claims;
 }
 
-export function splitToken(input: string): Parts {
-  const raw = input.trim().split(".");
-  if (raw.length !== 3) {
+/** What people paste: `Bearer eyJ…`, a quoted string from a JSON body, a trailing newline. */
+export function cleanToken(input: string): string {
+  const unquote = (value: string) =>
+    value
+      .trim()
+      .replace(/^(["'`])([\s\S]*)\1$/, "$2")
+      .trim();
+  return unquote(unquote(input).replace(/^bearer\s+/i, ""));
+}
+
+export function splitToken(input: string): Decoded {
+  const segments = cleanToken(input).split(".");
+  if (segments.length !== 3) {
     throw new ToolError({
-      tr: "JWT üç bölümden oluşur: başlık.veri.imza",
+      tr: "JWT üç bölümden oluşur: header.payload.signature",
       en: "A JWT has three parts: header.payload.signature",
     });
   }
   return {
-    header: decodeSegment(raw[0], "header"),
-    payload: decodeSegment(raw[1], "payload"),
-    raw,
+    header: decodeSegment(segments[0], "header"),
+    payload: decodeSegment(segments[1], "payload"),
+    segments: segments as [string, string, string],
   };
 }
 
-/** Rewrites the epoch seconds in place, so the JSON stays the shape it had. */
-function humanize(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(humanize);
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([key, item]) => {
-        if (TIME_CLAIMS.has(key) && typeof item === "number") {
-          return [key, `${item} (${new Date(item * 1000).toISOString()})`];
-        }
-        return [key, humanize(item)];
-      }),
-    );
+export function prettyJson(value: unknown): string {
+  return JSON.stringify(value, null, 2);
+}
+
+/** The download: both halves as one JSON document, values untouched. */
+export function decodedJson({ header, payload }: Decoded): string {
+  return prettyJson({ header, payload });
+}
+
+export type TimeStatus =
+  | { state: "valid"; ms: number }
+  | { state: "expired"; ms: number }
+  | { state: "notYet"; ms: number }
+  | { state: "noExp" };
+
+/** Is this token usable right now? `ms` is signed: until expiry, since expiry, until nbf. */
+export function timeStatus(payload: Claims, now: number): TimeStatus {
+  const { exp, nbf } = payload;
+  if (typeof nbf === "number" && nbf * 1000 > now) {
+    return { state: "notYet", ms: nbf * 1000 - now };
   }
-  return value;
+  if (typeof exp !== "number") return { state: "noExp" };
+  const ms = exp * 1000 - now;
+  return ms > 0 ? { state: "valid", ms } : { state: "expired", ms };
 }
 
-export function decodeToken(input: string, dates: boolean): string {
-  if (!input.trim()) return "";
-  const { header, payload } = splitToken(input);
-
-  const shown = dates
-    ? { header: humanize(header), payload: humanize(payload) }
-    : { header, payload };
-
-  return JSON.stringify(shown, null, 2);
-}
-
-/** The line under the output: is this token usable right now? */
-export function expiryNote(
-  input: string,
-): { expired: boolean; text: string } | null {
-  let payload: unknown;
-  try {
-    payload = splitToken(input).payload;
-  } catch {
-    return null;
+/** "in 3 hours", "111 gün sonra", "2.203 gün önce" — the locale's own words. */
+export function formatRelative(ms: number, locale: Locale): string {
+  const format = new Intl.RelativeTimeFormat(locale, { numeric: "always" });
+  const abs = Math.abs(ms);
+  const sign = ms < 0 ? -1 : 1;
+  if (abs < 60_000) {
+    return format.format(sign * Math.round(abs / 1000), "second");
   }
-  if (!payload || typeof payload !== "object") return null;
-
-  const exp = (payload as Record<string, unknown>).exp;
-  if (typeof exp !== "number") return null;
-
-  const remaining = exp * 1000 - Date.now();
-  return {
-    expired: remaining <= 0,
-    text: formatDuration(Math.abs(remaining)),
-  };
+  if (abs < 3_600_000) {
+    return format.format(sign * Math.round(abs / 60_000), "minute");
+  }
+  if (abs < 48 * 3_600_000) {
+    return format.format(sign * Math.round(abs / 3_600_000), "hour");
+  }
+  return format.format(sign * Math.round(abs / 86_400_000), "day");
 }
 
-function formatDuration(ms: number): string {
-  const minutes = Math.floor(ms / 60000);
-  if (minutes < 60) return `${minutes} dk / min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 48) return `${hours} sa / h`;
-  return `${Math.floor(hours / 24)} gün / days`;
+export function formatDate(seconds: number, locale: Locale): string {
+  return new Date(seconds * 1000).toLocaleString(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+/** The note shown after a timestamp claim; it annotates, never replaces. */
+export function timeAnnotation(
+  key: string,
+  value: unknown,
+  locale: Locale,
+  now: number,
+): string | null {
+  if (!TIME_CLAIMS.includes(key) || typeof value !== "number") return null;
+  if (!Number.isFinite(value) || Math.abs(value) > 1e11) return null;
+  return `${formatDate(value, locale)} · ${formatRelative(value * 1000 - now, locale)}`;
+}
+
+export type Verdict =
+  | { status: "valid"; alg: string }
+  | { status: "mismatch"; alg: string }
+  | { status: "badKey"; alg: string }
+  | { status: "unsigned" };
+
+type KeyLike = Awaited<ReturnType<typeof import("jose").importSPKI>>;
+
+async function readKey(
+  jose: typeof import("jose"),
+  key: string,
+  alg: string,
+  kid: unknown,
+): Promise<KeyLike | Uint8Array> {
+  if (key.startsWith("-----BEGIN CERTIFICATE-----")) {
+    return jose.importX509(key, alg);
+  }
+  if (key.startsWith("-----BEGIN PUBLIC KEY-----")) {
+    return jose.importSPKI(key, alg);
+  }
+  if (key.startsWith("-----")) throw new Error("unsupported PEM");
+  if (key.startsWith("{")) {
+    const parsed = JSON.parse(key) as { keys?: unknown };
+    const jwk = Array.isArray(parsed.keys)
+      ? ((parsed.keys as { kid?: unknown }[]).find((k) => k.kid === kid) ??
+        parsed.keys[0])
+      : parsed;
+    return jose.importJWK(jwk as Parameters<typeof jose.importJWK>[0], alg);
+  }
+  if (!alg.startsWith("HS")) throw new Error("needs a public key");
+  return new TextEncoder().encode(key);
 }
 
 /**
- * Verifies with a shared secret or a public key.
- *
- * `jose` is imported lazily: verification is the minority case, and its key
- * parsing is most of the weight of this tool.
+ * Checks the signature only. Expiry is shown on its own, so an expired token
+ * with a good signature reads as exactly that.
  */
-export async function verifyToken(input: string, key: string): Promise<string> {
-  const trimmed = key.trim();
-  if (!trimmed) {
-    throw new ToolError({
-      tr: "Doğrulama için anahtar gerekli.",
-      en: "Verification needs a key.",
-    });
-  }
+export async function verifyToken(
+  input: string,
+  key: string,
+): Promise<Verdict> {
+  const token = cleanToken(input);
+  const { header } = splitToken(token);
+  const alg = header.alg;
+  if (typeof alg !== "string" || alg === "none") return { status: "unsigned" };
 
   const jose = await import("jose");
-  const { header } = splitToken(input);
-  const algorithm =
-    header && typeof header === "object"
-      ? (header as Record<string, unknown>).alg
-      : undefined;
-
-  if (typeof algorithm !== "string" || algorithm === "none") {
-    throw new ToolError({
-      tr: "Token imzasız (alg: none) — doğrulanacak bir şey yok.",
-      en: "The token is unsigned (alg: none) — there is nothing to verify.",
-    });
-  }
-
+  let material: KeyLike | Uint8Array;
   try {
-    const material = trimmed.includes("-----BEGIN")
-      ? await jose.importSPKI(trimmed, algorithm)
-      : new TextEncoder().encode(trimmed);
-    await jose.jwtVerify(input.trim(), material, { algorithms: [algorithm] });
-    return `✓ imza geçerli / signature valid (${algorithm})`;
+    material = await readKey(jose, key.trim(), alg, header.kid);
+  } catch {
+    return { status: "badKey", alg };
+  }
+  try {
+    await jose.compactVerify(token, material, { algorithms: [alg] });
+    return { status: "valid", alg };
   } catch (cause) {
-    if (cause instanceof Error && cause.name === "JWTExpired") {
-      return `✓ imza geçerli ama token süresi dolmuş / valid signature, expired token`;
-    }
-    throw new ToolError({
-      tr: "İmza doğrulanamadı: anahtar yanlış ya da token değiştirilmiş.",
-      en: "Signature did not verify: wrong key, or the token was altered.",
-    });
+    return cause instanceof jose.errors.JWSSignatureVerificationFailed
+      ? { status: "mismatch", alg }
+      : { status: "badKey", alg };
   }
 }

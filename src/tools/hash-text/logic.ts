@@ -21,6 +21,17 @@ export const ALGORITHMS = [
 
 export type Algorithm = (typeof ALGORITHMS)[number];
 
+export const ALGORITHM_NAMES: Record<Algorithm, string> = {
+  md5: "MD5",
+  sha1: "SHA-1",
+  sha256: "SHA-256",
+  sha384: "SHA-384",
+  sha512: "SHA-512",
+  "sha3-256": "SHA3-256",
+  "sha3-512": "SHA3-512",
+  crc32: "CRC32",
+};
+
 export async function hashText(
   input: string,
   algorithm: Algorithm,
@@ -63,15 +74,50 @@ async function runDigest(
   }
 }
 
+export type Digest = { algorithm: Algorithm; name: string; value: string };
+
 /** Every algorithm at once, for identifying a digest of unknown origin. */
-export async function hashAll(input: string, upper: boolean): Promise<string> {
-  if (!input) return "";
-  const width = Math.max(...ALGORITHMS.map((name) => name.length));
-  const lines = await Promise.all(
-    ALGORITHMS.map(async (name) => {
-      const digest = await hashText(input, name, upper);
-      return `${name.padEnd(width)}  ${digest}`;
-    }),
+export async function hashAll(
+  input: string,
+  upper: boolean,
+): Promise<Digest[]> {
+  if (!input) return [];
+  return Promise.all(
+    ALGORITHMS.map(async (algorithm) => ({
+      algorithm,
+      name: ALGORITHM_NAMES[algorithm],
+      value: await hashText(input, algorithm, upper),
+    })),
   );
-  return lines.join("\n");
+}
+
+/** The digests as plain text, one `NAME  value` line each. */
+export function formatDigests(digests: Digest[]): string {
+  const width = Math.max(0, ...digests.map((d) => d.name.length));
+  return digests.map((d) => `${d.name.padEnd(width)}  ${d.value}`).join("\n");
+}
+
+/** Which algorithm produced `expected`, ignoring case and surrounding space. */
+export function findMatch(
+  digests: Digest[],
+  expected: string,
+): Algorithm | null {
+  const wanted = expected.trim().toLowerCase();
+  if (!wanted) return null;
+  return (
+    digests.find((d) => d.value.toLowerCase() === wanted)?.algorithm ?? null
+  );
+}
+
+export function utf8Length(input: string): number {
+  return new TextEncoder().encode(input).length;
+}
+
+/** An editor's final newline is part of the bytes, and the usual reason a digest does not match. */
+export function hasTrailingNewline(input: string): boolean {
+  return /\r?\n$/.test(input);
+}
+
+export function stripTrailingNewlines(input: string): string {
+  return input.replace(/(\r?\n)+$/, "");
 }

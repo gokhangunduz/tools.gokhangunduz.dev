@@ -1,5 +1,7 @@
 import type { TextToolSpec } from "../text-tool";
-import { jsonToYaml, yamlToJson } from "./logic";
+import { jsonToYaml, yamlNote, yamlToJson } from "./logic";
+
+let lastRun: { input: string; documents: number } | null = null;
 
 export const spec: TextToolSpec = {
   directions: [
@@ -8,18 +10,24 @@ export const spec: TextToolSpec = {
       label: { tr: "JSON → YAML", en: "JSON → YAML" },
       sample:
         '{\n  "name": "tools",\n  "port": 8080,\n  "hosts": ["a.dev", "b.dev"],\n  "debug": false\n}',
+      placeholder: { tr: "JSON yapıştır", en: "Paste JSON" },
       run: (input, options) => jsonToYaml(input, Number(options.indent)),
+      outputExtension: "yaml",
     },
     {
       id: "yaml-to-json",
       label: { tr: "YAML → JSON", en: "YAML → JSON" },
       sample:
         "name: tools\nport: 8080\nhosts:\n  - a.dev\n  - b.dev\ndebug: false",
-      run: (input, options) => yamlToJson(input, Number(options.indent)),
-      footnote: () => ({
-        tr: "Değerler yazıldığı gibi okunur: no boolean'a, 22:30 sayıya çevrilmez.",
-        en: "Values are read as written: no stays a string, 22:30 stays a time.",
-      }),
+      placeholder: { tr: "YAML yapıştır", en: "Paste YAML" },
+      run: async (input, options) => {
+        const result = await yamlToJson(input, Number(options.indent));
+        lastRun = { input, documents: result.documents };
+        return result.text;
+      },
+      footnote: (input) =>
+        yamlNote(lastRun?.input === input ? lastRun.documents : 1),
+      outputExtension: "json",
     },
   ],
   options: [
@@ -37,5 +45,6 @@ export const spec: TextToolSpec = {
       })),
     },
   ],
-  outputExtension: "yaml",
+  inverse: true,
+  code: true,
 };

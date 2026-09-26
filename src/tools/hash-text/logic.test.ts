@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { hashAll, hashText } from "./logic";
+import {
+  ALGORITHMS,
+  ALGORITHM_NAMES,
+  findMatch,
+  formatDigests,
+  hasTrailingNewline,
+  hashAll,
+  hashText,
+  stripTrailingNewlines,
+  utf8Length,
+} from "./logic";
 
 describe("hashText", () => {
   it("matches the known digests of the empty-ish canonical input", async () => {
-    // `echo -n abc | md5sum` and friends.
     expect(await hashText("abc", "md5", false)).toBe(
       "900150983cd24fb0d6963f7d28e17f72",
     );
@@ -16,7 +25,6 @@ describe("hashText", () => {
   });
 
   it("hashes the UTF-8 bytes of non-ASCII text", async () => {
-    // sha256 of the two bytes c3 a7, not of a UTF-16 code unit.
     expect(await hashText("ç", "sha256", false)).toBe(
       "8bfa829b8119a6f39b91fd8decec63830b556e4d88a9da29334d7b0558829f2d",
     );
@@ -34,10 +42,72 @@ describe("hashText", () => {
 });
 
 describe("hashAll", () => {
-  it("lists every algorithm with its digest", async () => {
-    const output = await hashAll("abc", false);
-    expect(output).toContain("md5");
-    expect(output).toContain("900150983cd24fb0d6963f7d28e17f72");
-    expect(output.split("\n")).toHaveLength(8);
+  it("lists every algorithm under its canonical name", async () => {
+    const digests = await hashAll("abc", false);
+    expect(digests.map((d) => d.name)).toEqual([
+      "MD5",
+      "SHA-1",
+      "SHA-256",
+      "SHA-384",
+      "SHA-512",
+      "SHA3-256",
+      "SHA3-512",
+      "CRC32",
+    ]);
+    expect(digests[0].value).toBe("900150983cd24fb0d6963f7d28e17f72");
+    expect(digests.at(-1)?.value).toBe("352441c2");
+  });
+
+  it("has a display name for every algorithm", () => {
+    for (const algorithm of ALGORITHMS) {
+      expect(ALGORITHM_NAMES[algorithm]).toBeTruthy();
+    }
+  });
+
+  it("returns nothing for empty input", async () => {
+    expect(await hashAll("", false)).toEqual([]);
+  });
+
+  it("formats as aligned lines for copying", async () => {
+    const text = formatDigests(await hashAll("abc", false));
+    expect(text.split("\n")).toHaveLength(8);
+    expect(text).toContain("MD5       900150983cd24fb0d6963f7d28e17f72");
+  });
+});
+
+describe("findMatch", () => {
+  it("finds the algorithm ignoring case and surrounding space", async () => {
+    const digests = await hashAll("abc", false);
+    expect(
+      findMatch(digests, "  A9993E364706816ABA3E25717850C26C9CD0D89D\n"),
+    ).toBe("sha1");
+  });
+
+  it("returns null for no match or an empty value", async () => {
+    const digests = await hashAll("abc", false);
+    expect(findMatch(digests, "deadbeef")).toBeNull();
+    expect(findMatch(digests, "   ")).toBeNull();
+  });
+});
+
+describe("trailing newline", () => {
+  it("is detected, and changes the digest", async () => {
+    expect(hasTrailingNewline("abc\n")).toBe(true);
+    expect(hasTrailingNewline("abc\r\n")).toBe(true);
+    expect(hasTrailingNewline("a\nbc")).toBe(false);
+    expect(await hashText("abc\n", "md5", false)).not.toBe(
+      await hashText("abc", "md5", false),
+    );
+  });
+
+  it("is removed, however many there are", () => {
+    expect(stripTrailingNewlines("abc\r\n\n")).toBe("abc");
+    expect(stripTrailingNewlines("a\nb")).toBe("a\nb");
+  });
+});
+
+describe("utf8Length", () => {
+  it("counts bytes, not characters", () => {
+    expect(utf8Length("Merhaba dünya")).toBe(14);
   });
 });

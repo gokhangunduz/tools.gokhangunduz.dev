@@ -3,7 +3,7 @@ import type { ToolMeta } from "../types";
 export const meta: ToolMeta = {
   id: "text-diff",
   category: "text",
-  icon: "type",
+  icon: "diff",
   name: { tr: "Metin karşılaştır", en: "Text diff" },
   blurb: {
     tr: "İki metni satır, kelime ya da karakter düzeyinde karşılaştırır; CRLF farkını sorun etmez.",
@@ -13,5 +13,4 @@ export const meta: ToolMeta = {
     tr: ["diff", "karşılaştır", "fark", "metin", "değişiklik", "patch"],
     en: ["diff", "compare", "difference", "text", "changes", "patch"],
   },
-  related: ["json-diff", "list-compare"],
 };

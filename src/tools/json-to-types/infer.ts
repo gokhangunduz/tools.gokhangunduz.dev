@@ -54,6 +54,8 @@ export function infer(value: unknown): Inferred {
 /** Combines two inferences of the same position into one that covers both. */
 export function merge(a: Inferred, b: Inferred): Inferred {
   if (same(a, b)) return a;
+  if (a.kind === "unknown") return b;
+  if (b.kind === "unknown") return a;
 
   // A number seen as both 1 and 1.5 is a number, not a union.
   if (numeric(a) && numeric(b)) return { kind: "number" };

@@ -1,11 +1,17 @@
 import type { TextToolSpec } from "../text-tool";
-import { DIALECTS, formatSql, type Dialect, type Keywords } from "./logic";
+import {
+  DIALECT_LABELS,
+  DIALECTS,
+  formatSql,
+  type Dialect,
+  type Keywords,
+} from "./logic";
 
 export const spec: TextToolSpec = {
   directions: [
     {
       id: "format",
-      label: { tr: "Biçimlendir", en: "Format" },
+      label: { tr: "Format", en: "Format" },
       sample:
         "select u.id,u.name,count(o.id) as orders from users u left join orders o on o.user_id=u.id where u.active=true group by u.id,u.name having count(o.id)>2 order by orders desc limit 10",
       placeholder: { tr: "SQL yapıştır", en: "Paste SQL" },
@@ -22,17 +28,17 @@ export const spec: TextToolSpec = {
     {
       kind: "select",
       id: "dialect",
-      label: { tr: "Lehçe", en: "Dialect" },
+      label: { tr: "Dialect", en: "Dialect" },
       default: "postgresql",
       choices: DIALECTS.map((name) => ({
         value: name,
-        label: { tr: name, en: name },
+        label: DIALECT_LABELS[name],
       })),
     },
     {
       kind: "select",
       id: "keywords",
-      label: { tr: "Anahtar kelimeler", en: "Keywords" },
+      label: { tr: "Keyword'ler", en: "Keywords" },
       default: "upper",
       choices: [
         { value: "upper", label: { tr: "BÜYÜK", en: "UPPER" } },
@@ -52,4 +58,5 @@ export const spec: TextToolSpec = {
     },
   ],
   outputExtension: "sql",
+  code: true,
 };

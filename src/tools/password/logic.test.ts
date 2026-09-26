@@ -4,6 +4,8 @@ import {
   crackTime,
   entropyBits,
   generatePasswords,
+  SETS,
+  strength,
 } from "./logic";
 
 const base = {
@@ -70,6 +72,41 @@ describe("generatePasswords", () => {
     }
   });
 
+  it("puts every enabled set into every password", () => {
+    const lines = generatePasswords({ ...base, length: 8, count: 1000 }).split(
+      "\n",
+    );
+    const symbol = new RegExp(`[${SETS.symbols.replace(/[\]\\^-]/g, "\\$&")}]`);
+    for (const line of lines) {
+      expect(line).toMatch(/[a-z]/);
+      expect(line).toMatch(/[A-Z]/);
+      expect(line).toMatch(/[0-9]/);
+      expect(line).toMatch(symbol);
+    }
+  });
+
+  it("uses a custom symbol set, and only its characters", () => {
+    const value = generatePasswords({
+      ...base,
+      lower: false,
+      upper: false,
+      digits: false,
+      symbolSet: "-_.~",
+      length: 200,
+    });
+    expect(value).toMatch(/^[-_.~]+$/);
+  });
+
+  it("can leave out lowercase letters", () => {
+    expect(
+      generatePasswords({ ...base, lower: false, length: 200 }),
+    ).not.toMatch(/[a-z]/);
+  });
+
+  it("refuses a length shorter than the number of sets", () => {
+    expect(() => generatePasswords({ ...base, length: 3 })).toThrow();
+  });
+
   it("refuses an empty alphabet or a silly length", () => {
     expect(() =>
       generatePasswords({
@@ -81,6 +118,8 @@ describe("generatePasswords", () => {
       }),
     ).toThrow();
     expect(() => generatePasswords({ ...base, length: 2 })).toThrow();
+    expect(() => generatePasswords({ ...base, length: 300 })).toThrow();
+    expect(() => generatePasswords({ ...base, length: NaN })).toThrow();
   });
 });
 
@@ -127,6 +166,29 @@ describe("buildAlphabet", () => {
 describe("crackTime", () => {
   it("grows with the entropy", () => {
     expect(crackTime(40, "en")).toContain("seconds");
-    expect(crackTime(128, "en")).toContain("years");
+    expect(crackTime(60, "en")).toContain("days");
+    expect(crackTime(128, "en")).toBe("longer than the age of the universe");
+    expect(crackTime(128, "tr")).toBe("evrenin yaşından uzun");
+  });
+
+  it("marks a figure as approximate and writes it for the locale", () => {
+    expect(crackTime(40, "en")).toBe("~5.5 seconds");
+    expect(crackTime(40, "tr")).toBe("~5,5 saniye");
+    expect(crackTime(60, "en")).toBe("~67 days");
+  });
+
+  it("stays qualitative past a million years", () => {
+    expect(crackTime(85, "en")).toBe("millions of years");
+    expect(crackTime(94, "en")).toBe("billions of years");
+  });
+});
+
+describe("strength", () => {
+  it("rates by entropy", () => {
+    expect(strength(40).text.en).toBe("Weak");
+    expect(strength(40).tone).toBe("destructive");
+    expect(strength(70).text.tr).toBe("Orta");
+    expect(strength(100).text.en).toBe("Strong");
+    expect(strength(130).text.tr).toBe("Çok güçlü");
   });
 });
