@@ -13,9 +13,9 @@ import en from "./en.json" with { type: "json" };
  * against it, so a key added to one and forgotten in the other fails to
  * compile rather than rendering as itself in production.
  */
-export const LOCALES = ["tr", "en"] as const;
+export const LOCALES = ["en", "tr"] as const;
 export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = "tr";
+export const DEFAULT_LOCALE: Locale = "en";
 
 type Messages = typeof tr;
 

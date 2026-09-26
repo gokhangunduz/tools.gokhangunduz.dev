@@ -18,7 +18,7 @@
       "tr",
       "en"
     ],
-    "defaultLanguage": "tr",
+    "defaultLanguage": "en",
     "stack": [
       "Next.js 16 (App Router, `output: \"export\"` → `out/`)",
       "React 19 · TypeScript (strict)",

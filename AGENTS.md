@@ -22,7 +22,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 |---|---|
 | Site | **tools.gokhangunduz.dev** — https://tools.gokhangunduz.dev |
 | Stack | Next.js 16 (App Router, `output: "export"` → `out/`) · React 19 · TypeScript (strict) · Tailwind v4 · shadcn/ui · Geist · vitest (logic) · playwright (smoke) |
-| Localized | TR · EN — default TR |
+| Localized | TR · EN — default EN |
 | Node | 24 |
 | Hosting | Cloudflare Pages, built from Git — no server, no deploy script |
 
