@@ -1,21 +1,18 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>tools.gokhangunduz.dev</title>
-    <link rel="canonical" href="https://tools.gokhangunduz.dev/tr" />
+    <link rel="canonical" href="https://tools.gokhangunduz.dev/en" />
     <link rel="alternate" hreflang="tr" href="https://tools.gokhangunduz.dev/tr" />
     <link rel="alternate" hreflang="en" href="https://tools.gokhangunduz.dev/en" />
     <script>
-      var pick = (navigator.languages || [navigator.language || ""])
-        .map(function (code) { return String(code).slice(0, 2).toLowerCase(); })
-        .find(function (code) { return code === "tr" || code === "en"; });
-      location.replace("/" + (pick || "tr") + location.search + location.hash);
+      location.replace("/en" + location.search + location.hash);
     </script>
-    <noscript><meta http-equiv="refresh" content="0; url=/tr" /></noscript>
+    <noscript><meta http-equiv="refresh" content="0; url=/en" /></noscript>
   </head>
   <body>
-    <a href="/tr">Türkçe</a> · <a href="/en">English</a>
+    <a href="/en">English</a> · <a href="/tr">Türkçe</a>
   </body>
 </html>
