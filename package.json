@@ -1,6 +1,33 @@
 {
-  "name": "converter.gokhangunduz.dev",
+  "name": "tools.gokhangunduz.dev",
   "version": "0.1.0",
+  "description": "Free developer tools that run entirely in your browser: encoders, hashes, formatters, converters and generators.",
+  "homepage": "https://tools.gokhangunduz.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gokhangunduz/tools.gokhangunduz.dev.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gokhangunduz/tools.gokhangunduz.dev/issues"
+  },
+  "license": "MIT",
+  "author": "Gökhan Gündüz <me@gokhangunduz.dev> (https://gokhangunduz.dev)",
+  "keywords": [
+    "developer-tools",
+    "base64",
+    "jwt",
+    "json",
+    "regex",
+    "cron",
+    "hash",
+    "qr-code",
+    "nextjs",
+    "privacy",
+    "client-side"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,30 +41,30 @@
     "verify": "zsh verify/all.sh"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.1.23",
-    "@radix-ui/react-slot": "^1.3.3",
+    "@radix-ui/react-dialog": "^1.3.1",
+    "@radix-ui/react-slot": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "cron-parser": "^5.10.1",
-    "cronstrue": "^3.27.0",
+    "cron-parser": "^5.10.3",
+    "cronstrue": "^3.38.0",
     "css-tree": "^3.2.1",
     "csso": "^5.0.5",
     "diff": "^9.0.0",
-    "fast-xml-parser": "^5.11.1",
-    "geist": "^1.7.2",
+    "fast-xml-parser": "^5.11.2",
+    "geist": "^1.9.0",
     "hash-wasm": "^4.12.0",
-    "jose": "^6.2.12",
-    "js-yaml": "^5.4.2",
-    "lucide-react": "^1.48.0",
-    "marked": "^18.0.14",
-    "next": "^16.3.6",
+    "jose": "^6.2.15",
+    "js-yaml": "^5.5.0",
+    "lucide-react": "^1.67.0",
+    "marked": "^18.1.3",
+    "next": "^16.4.4",
     "papaparse": "^5.7.0",
     "piexifjs": "^1.0.6",
-    "prettier": "^3.9.9",
+    "prettier": "^3.9.10",
     "qrcode": "^1.5.4",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "sql-formatter": "^15.9.0",
     "svgo": "^4.1.0",
     "tailwind-merge": "^3.7.0",
@@ -55,11 +82,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/semver": "^7.8.0",
-    "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.6",
-    "playwright": "^1.63.0",
+    "eslint": "^10.14.0",
+    "eslint-config-next": "^16.4.4",
+    "playwright": "^1.64.1",
     "tailwindcss": "^4",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.2"
+    "vitest": "^5.1.0"
   }
 }
