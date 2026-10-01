@@ -1,22 +1,9 @@
-/**
- * Opens every tool in a real browser and uses it.
- *
- * The unit tests cover the logic; this covers everything between it and the
- * page — a spec whose option ids do not match what its `run` reads, a tool
- * registered without a component, a lazy import that fails only in the
- * browser, a hydration mismatch. It presses the sample button, waits for the
- * output, and fails on a console error, a visible error line, or an output
- * that stayed empty.
- *
- *   node scripts/smoke.mjs [baseUrl]
- */
+
 import { chromium } from "playwright";
 import { readFileSync } from "node:fs";
 
 const BASE = process.argv[2] ?? "http://localhost:3001";
 
-// The registry is TypeScript, so the ids are read out of it rather than
-// imported: one regular expression is cheaper than a build step for a script.
 const registry = readFileSync(
   new URL("../src/tools/components.ts", import.meta.url),
   "utf8",
@@ -30,10 +17,8 @@ if (ids.length === 0) {
   process.exit(1);
 }
 
-// These reach a third-party API; they are opened and checked for errors, but
-// their output is not required, because a failing network is not a bug here.
 const NETWORK = new Set(["dns-lookup", "ip-geo"]);
-// These take a file, so there is nothing to type and no sample to press.
+
 const FILE_INPUT = new Set(["image-base64", "image-convert"]);
 
 const browser = await chromium.launch();
@@ -47,8 +32,7 @@ for (const locale of ["tr", "en"]) {
 
     page.on("console", (message) => {
       if (message.type() !== "error") return;
-      // A network tool's third-party service refusing (a 429, an outage) is the
-      // failing network the NETWORK set exists to tolerate.
+
       if (
         NETWORK.has(id) &&
         message.text().startsWith("Failed to load resource")
@@ -70,7 +54,6 @@ for (const locale of ["tr", "en"]) {
         problems.push(`http ${response?.status()}`);
       }
 
-      // The heading proves the page rendered rather than erroring into a shell.
       await page.waitForSelector("h1", { timeout: 10_000 });
 
       if (!FILE_INPUT.has(id)) {
@@ -83,8 +66,6 @@ for (const locale of ["tr", "en"]) {
           await page.waitForTimeout(900);
         }
 
-        // `data-tool-error` rather than `[role="alert"]`: Next's dev overlay
-        // renders an empty live region that matches the latter on every page.
         const alert = page.locator("[data-tool-error]");
         if (!NETWORK.has(id) && (await alert.count())) {
           problems.push(
