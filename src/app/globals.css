@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/* Neutral surfaces, with colour carried by the category: every tool takes
-   its category's hue as `--tint`, and badges, active states and focus use
-   it. The rest of the page stays quiet so the hue reads as wayfinding. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -169,8 +166,6 @@
     letter-spacing: -0.01em;
   }
 
-  /* Tailwind v4 dropped the browser default of `cursor: pointer` on buttons.
-     Set once here so nothing new can be added without it. */
   button:not(:disabled),
   [role="button"]:not(:disabled),
   a[href],
@@ -188,18 +183,13 @@
     cursor: not-allowed;
   }
 
-  /* Every tool prints values that are compared by eye — hashes, timestamps,
-     byte counts. They line up only with tabular figures. */
   .tabular {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
 }
 
-/* ─────────────────────────────────────────────────── markdown preview ───
-   The Markdown editor's preview pane. The site's own type scale rather than
-   a prose plugin's, so a heading there looks like a heading here instead of
-   like a different product embedded in the page. */
+/* markdown preview */
 .markdown-preview > :first-child {
   margin-top: 0;
 }

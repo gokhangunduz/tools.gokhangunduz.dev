@@ -4,10 +4,6 @@ export const dynamic = "force-static";
 import { LOCALES } from "@/i18n";
 import { TOOLS } from "@/tools/registry";
 
-/**
- * Generated from the registry, so a tool is listed the moment it is added
- * and nothing can drift out of date.
- */
 const BASE = "https://tools.gokhangunduz.dev";
 
 export default function sitemap(): MetadataRoute.Sitemap {

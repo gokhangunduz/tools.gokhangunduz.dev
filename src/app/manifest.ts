@@ -2,10 +2,6 @@ import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
 
-/**
- * Installable, and offline once the service worker has seen a page — the
- * tools themselves need nothing from the network to run.
- */
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "tools.gokhangunduz.dev",
