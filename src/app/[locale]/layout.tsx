@@ -27,7 +27,7 @@ export async function generateMetadata({
   return {
     title: {
       default: `${t(locale, "app.name")} — ${t(locale, "app.tagline")}`,
-      // Tool pages supply their own name and get the site's after it.
+
       template: `%s — ${t(locale, "app.short")}`,
     },
     description: t(locale, "app.description"),
@@ -40,8 +40,6 @@ export async function generateMetadata({
 }
 
 export const viewport: Viewport = {
-  // Two entries so the browser chrome follows the palette rather than sitting
-  // white above a dark page.
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fafafa" },
     { media: "(prefers-color-scheme: dark)", color: "#09090b" },
@@ -61,8 +59,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      // The inline script below sets `dark` before React sees the document, so
-      // the server's markup and the client's first render differ by design.
+
       suppressHydrationWarning
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
@@ -70,8 +67,6 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="flex h-dvh flex-col overflow-hidden">
-        {/* First in the tab order and invisible until focused: a keyboard
-            visitor should not walk the header to reach the tool. */}
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border focus:bg-background focus:px-3 focus:py-2 focus:text-sm"
