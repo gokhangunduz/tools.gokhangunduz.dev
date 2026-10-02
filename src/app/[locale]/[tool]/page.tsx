@@ -10,13 +10,6 @@ import { IconBadge } from "@/components/ToolIcon";
 import FavoriteButton from "@/components/FavoriteButton";
 import VisitTracker from "@/components/VisitTracker";
 
-/**
- * Every tool page, prerendered at build time.
- *
- * The input never leaves the browser, so there is nothing per-request to
- * render, and a static page is what makes the tool usable the moment it
- * paints.
- */
 export const dynamicParams = false;
 
 export function generateStaticParams() {
