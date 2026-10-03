@@ -8,14 +8,6 @@ import { CATEGORY_BY_ID } from "@/tools/categories";
 import ToolIcon from "@/components/ToolIcon";
 import { searchTools } from "@/tools/registry";
 
-/**
- * Cmd+K, and the header's search button.
- *
- * Ranking is `searchTools`, not cmdk's built-in matcher, because the ordering
- * here is deliberate — an exact name beats a keyword beats a blurb, and both
- * languages are searched whatever the interface is set to. `shouldFilter` is
- * off so the list shows exactly what that function returned, in its order.
- */
 export default function CommandPalette({
   locale,
   open,
@@ -30,8 +22,6 @@ export default function CommandPalette({
 
   const results = useMemo(() => searchTools(query, locale), [query, locale]);
 
-  // Cleared as it closes rather than as it opens, so the list does not flash
-  // the previous search's results on the way out.
   function handleOpenChange(next: boolean) {
     if (!next) setQuery("");
     onOpenChange(next);

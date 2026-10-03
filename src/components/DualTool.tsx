@@ -64,17 +64,6 @@ type Failure = {
   field?: string;
 };
 
-/**
- * Renders a tool with two inputs and one output.
- *
- * Neither side goes into the URL: a diff of two files is past the length a
- * link should carry, and half a comparison in the address bar would be worse
- * than none. Everything else — the error strip over the last good result,
- * copy, the samples — behaves as it does in the single-input tools, because it
- * is the same page to the person using it.
- *
- * Below `md` the three panes do not fit one screen, so they become tabs.
- */
 export default function DualTool<T>({
   locale,
   spec,
@@ -119,9 +108,6 @@ export default function DualTool<T>({
     try {
       const value = spec.run(left, right, values);
       if (value instanceof Promise) {
-        // Claim the rejection here, not only in the effect below: React's
-        // strict double-render discards the first promise before any effect
-        // runs, and an unclaimed rejection surfaces as an uncaught error.
         value.catch(() => {});
         return { result: null, error: null, promise: value };
       }

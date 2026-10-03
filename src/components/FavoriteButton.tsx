@@ -5,7 +5,6 @@ import { t, type Locale } from "@/i18n";
 import { useFavorites } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
-/** The star on a tool page, kept in step with the one on its card. */
 export default function FavoriteButton({
   locale,
   toolId,
