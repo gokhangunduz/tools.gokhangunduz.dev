@@ -4,14 +4,6 @@ import { usePathname } from "next/navigation";
 import { LOCALES, t, type Locale } from "@/i18n";
 import { cn } from "@/lib/utils";
 
-/**
- * Swaps the first path segment.
- *
- * A plain link rather than a client navigation: every locale shares the root
- * layout that renders `<html>`, and re-rendering it drops the theme class the
- * head script set, so a full load is what keeps the theme. The fragment carries
- * the input and is appended on click, so switching language keeps the box.
- */
 export default function LocaleToggle({ locale }: { locale: Locale }) {
   const pathname = usePathname();
 
@@ -44,7 +36,7 @@ export default function LocaleToggle({ locale }: { locale: Locale }) {
 
 function swapLocale(pathname: string, locale: Locale): string {
   const segments = pathname.split("/");
-  // ["", "tr", "base64-text"] — the locale is always the first real segment.
+
   segments[1] = locale;
   return segments.join("/") || `/${locale}`;
 }

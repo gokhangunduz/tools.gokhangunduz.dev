@@ -40,18 +40,6 @@ const COPY_ALL: Localized = { tr: "Tümünü kopyala", en: "Copy all" };
 
 const noSubscription = () => () => {};
 
-/**
- * Renders a tool with no input: options, a button, and the result.
- *
- * The generation runs in an effect keyed on a counter as well as the options,
- * so pressing the button again with the same settings produces a new value —
- * which is the whole point of a generator, and something a `useMemo` over the
- * options would quietly refuse to do.
- *
- * Settings changed from their defaults are remembered per tool in this
- * browser, secrets excepted. One value is shown large and copies on click;
- * several are a numbered list with a copy button per row.
- */
 export default function GeneratorTool({
   locale,
   spec,

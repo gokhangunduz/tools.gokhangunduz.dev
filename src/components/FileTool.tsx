@@ -73,13 +73,6 @@ const COPY = {
 
 const noop = () => () => {};
 
-/**
- * Renders a tool whose input is a file.
- *
- * The file stays in state so that changing an option re-runs the work without
- * asking for it again, and the last good result stays on screen, dimmed, while
- * the next one is made.
- */
 export default function FileTool({
   locale,
   spec,
@@ -188,7 +181,6 @@ export default function FileTool({
     return () => document.removeEventListener("paste", onPaste);
   }, [take]);
 
-  // Revoked when replaced, so a long session does not hold every image in memory.
   const thumb = useMemo(
     () =>
       file && file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
@@ -488,7 +480,6 @@ export default function FileTool({
   );
 }
 
-/** Identifies a file well enough to tell a re-pick of the same one from a new one. */
 function fileKey(file: File): string {
   return `${file.name}:${file.size}:${file.lastModified}`;
 }
