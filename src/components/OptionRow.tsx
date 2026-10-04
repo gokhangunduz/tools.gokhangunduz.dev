@@ -17,15 +17,6 @@ const TEXT_WIDTH = {
 
 const INVALID = "border-destructive focus-visible:border-destructive";
 
-/**
- * The options strip above the input.
- *
- * Plain controls rather than a settings panel: there are never more than four
- * of them, and a tool whose switches are hidden behind a disclosure is a tool
- * whose switches nobody finds. Below `sm` they line up as a two-column grid.
- *
- * The caller passes only the options that apply right now (`visibleOptions`).
- */
 export default function OptionRow({
   locale,
   options,
@@ -38,9 +29,9 @@ export default function OptionRow({
   options: ToolOption[];
   values: OptionValues;
   onChange: (id: string, value: OptionValue) => void;
-  /** The option a ToolError names as the problem. */
+
   invalidField?: string;
-  /** The tool writes a link, so a filled secret option gets a note that it is left out. */
+
   sharing?: boolean;
 }) {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});

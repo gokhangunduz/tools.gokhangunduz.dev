@@ -10,17 +10,6 @@ import { copyText } from "@/lib/clipboard";
 import type { ResultGroup, ResultRow, Tone } from "@/tools/text-tool";
 import { cn } from "@/lib/utils";
 
-/**
- * The editor chrome every tool is built from: one bordered frame, an optional
- * toolbar across its top, and panes that each carry their own header bar.
- * Tools share it so that moving between them never changes where the copy
- * button is.
- *
- * `size` decides how the frame takes the page's height: `fill` stretches to
- * it, `content` ends where its content ends, and `split` does that from `md`
- * up with a floor that keeps two empty panes usable. All three shrink to the
- * space the page has, so the panes scroll rather than the page.
- */
 export function Frame({
   toolbar,
   children,
@@ -53,7 +42,6 @@ export function Frame({
   );
 }
 
-/** Two panes side by side from `md` up, stacked below it; either way they share the height. */
 export function Split({
   children,
   className,
@@ -137,7 +125,6 @@ const TONE_TEXT: Record<Tone, string> = {
   muted: "text-muted-foreground",
 };
 
-/** A short figure beside a pane label: a size, a saving, a count. */
 export function PaneBadge({
   children,
   tone = "muted",
@@ -205,7 +192,6 @@ export function PaneButton({
 }
 
 type PaneTextareaProps = React.ComponentProps<typeof Textarea> & {
-  /** `fill` takes the pane's height and scrolls inside; `content` grows with the text and lets the pane scroll. */
   sizing?: "fill" | "content";
   wrapMode?: "soft" | "off" | "anywhere";
   lineNumbers?: boolean;
@@ -259,7 +245,6 @@ export function PaneTextarea({
   );
 }
 
-/** One line above whatever the pane still shows, rather than in place of it. */
 export function PaneError({
   children,
   className,
@@ -286,10 +271,6 @@ function label(locale: Locale, value: Localized | string): string {
   return typeof value === "string" ? value : value[locale];
 }
 
-/**
- * A result made of named values. Each row copies on its own, since the value
- * wanted is usually one of them rather than the whole list.
- */
 export function KeyValueList({
   locale,
   rows = [],
@@ -377,11 +358,6 @@ function KeyValueItem({ locale, row }: { locale: Locale; row: ResultRow }) {
   );
 }
 
-/**
- * One choice out of a few. It never wraps: a row that does not fit scrolls
- * sideways under a fade, and below `sm` more than five choices become a
- * native select.
- */
 export function Segmented<T extends string>({
   value,
   options,
