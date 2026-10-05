@@ -1,13 +1,6 @@
 import { ICONS, type IconName } from "@/tools/icons";
 import { cn } from "@/lib/utils";
 
-/**
- * Renders an icon named by a string.
- *
- * Tool and category metadata crosses the server/client boundary, so it holds
- * the icon's name rather than the component. This is the single place that
- * looks one up.
- */
 export default function ToolIcon({
   name,
   className,
@@ -25,7 +18,6 @@ const BADGE_SIZES = {
   lg: "size-11 rounded-xl [&>svg]:size-5",
 } as const;
 
-/** An icon on a tile of the surrounding category's hue (`--tint`). */
 export function IconBadge({
   name,
   size = "md",
