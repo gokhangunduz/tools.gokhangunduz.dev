@@ -83,22 +83,6 @@ type Failure = {
 
 const noSubscription = () => () => {};
 
-/**
- * Renders any tool that is "text in, text out".
- *
- * The conversion runs on every keystroke, with no debounce. That is the right
- * default for the work these tools do — encoding a paragraph is microseconds —
- * and it is what makes the page feel like a calculator rather than a form.
- * Async directions and inputs over 20 KB wait 250 ms for typing to pause, and
- * network tools (`trigger: "submit"`) run only when asked.
- *
- * A direction that returns a promise (WebCrypto, a wasm hash) is awaited here
- * instead: the last good output stays on screen, dimmed, while the next one is
- * computed, so the panel does not blink empty between keystrokes, and results
- * that arrive out of order are dropped by comparing against the promise that
- * is current. An error keeps that last good output under it for the same
- * reason.
- */
 export default function TextTool({
   locale,
   spec,
@@ -108,10 +92,6 @@ export default function TextTool({
   spec: TextToolSpec;
   toolId: string;
 }) {
-  // The fragment is an external store, read straight through rather than
-  // copied into state on mount. Once anything is touched, the page wins: the
-  // `chosen*` states going from null to a value is the moment the link stops
-  // being the source, and all three are taken over together.
   const hash = useSyncExternalStore(subscribeShared, readSharedHash, () => "");
   const client = useSyncExternalStore(
     noSubscription,
@@ -161,7 +141,6 @@ export default function TextTool({
     "submit";
   const shown = visibleOptions(spec.options, values, active.id);
 
-  // A submit tool runs what was last submitted; a link counts as submitted.
   const [submission, setSubmission] = useState<{
     value: string | null;
     count: number;
@@ -206,9 +185,6 @@ export default function TextTool({
     [direction, values],
   );
 
-  // And keep it current afterwards, so the address bar is always the link to
-  // send. Replaces rather than pushes: Back should leave the tool, not undo
-  // the last keystroke.
   useEffect(() => {
     if (spec.share === false) return;
     const id = window.setTimeout(
@@ -269,8 +245,6 @@ export default function TextTool({
     return () => window.clearTimeout(id);
   }, [line, input]);
 
-  // Synchronous directions settle here; async ones hand back the promise for
-  // the effect below, which is the only place allowed to call setState.
   const computed = useMemo((): {
     result: TextResult | null;
     error: Failure | null;
@@ -280,9 +254,6 @@ export default function TextTool({
     try {
       const value = active.run(ran, values, locale);
       if (value instanceof Promise) {
-        // Claim the rejection here, not only in the effect below: React's
-        // strict double-render discards the first promise before any effect
-        // runs, and an unclaimed rejection surfaces as an uncaught error.
         value.catch(() => {});
         return { result: null, error: null, promise: value };
       }
@@ -290,7 +261,7 @@ export default function TextTool({
     } catch (cause) {
       return { result: null, error: describe(cause, locale), promise: null };
     }
-    // The count is a dependency so that submitting the same value asks again.
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, runs, ran, values, locale, submission?.count]);
 
@@ -430,8 +401,6 @@ export default function TextTool({
     }
   }, [output]);
 
-  // Cmd/Ctrl+Shift+C copies the output from anywhere on the page, so the
-  // result can be taken without leaving the keyboard or the input box.
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (
@@ -899,7 +868,6 @@ export default function TextTool({
   );
 }
 
-/** Turns anything thrown into a line the user can act on. */
 function describe(cause: unknown, locale: Locale): Failure {
   if (cause instanceof ToolError) {
     return {
@@ -914,7 +882,6 @@ function describe(cause: unknown, locale: Locale): Failure {
   return { message, detail: message };
 }
 
-/** Brings a line of the input into view, whether the textarea or its pane scrolls. */
 function scrollToLine(field: HTMLTextAreaElement, line: number) {
   const style = getComputedStyle(field);
   const lineHeight = parseFloat(style.lineHeight) || 20;

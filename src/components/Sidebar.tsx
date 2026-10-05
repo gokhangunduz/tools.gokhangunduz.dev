@@ -11,7 +11,6 @@ import { TOOL_BY_ID, TOOLS } from "@/tools/registry";
 import type { ToolMeta } from "@/tools/types";
 import { cn } from "@/lib/utils";
 
-/** Every tool, grouped, with the current one marked. Used as the desktop rail and inside the mobile drawer. */
 export default function Sidebar({
   locale,
   onNavigate,
@@ -77,7 +76,6 @@ export default function Sidebar({
   );
 }
 
-/** The desktop rail. Tool routes only: the home page is the index itself. */
 export function SidebarRail({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   if (!pathname.split("/")[2]) return null;

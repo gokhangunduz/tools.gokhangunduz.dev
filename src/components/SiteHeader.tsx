@@ -98,8 +98,7 @@ export default function SiteHeader({ locale }: { locale: Locale }) {
           <span className="hidden sm:inline">
             {t(locale, "nav.openPalette")}
           </span>
-          {/* The shortcut is shown, not hidden in a tooltip: it is the fastest
-              path to every tool and nobody guesses it. */}
+
           <kbd className="ml-auto hidden rounded border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline">
             ⌘K
           </kbd>
