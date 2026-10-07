@@ -2,14 +2,6 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
-/**
- * The two lists the home page keeps: what was starred, and what was opened.
- *
- * Both are per-browser and neither is worth a backend. They are read through
- * `useSyncExternalStore` so that starring a tool on the page updates the
- * header, the card and the home page at once without a context around the
- * whole app.
- */
 const FAVORITES_KEY = "tools-favorites";
 const RECENT_KEY = "tools-recent";
 const RECENT_LIMIT = 8;
@@ -22,7 +14,7 @@ function emit() {
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  // Another tab starring a tool should not leave this one disagreeing.
+
   window.addEventListener("storage", listener);
   return () => {
     listeners.delete(listener);
@@ -46,19 +38,10 @@ function read(key: string): string[] {
 function write(key: string, value: string[]) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Private mode with storage disabled: the app works, the list just does
-    // not survive the tab.
-  }
+  } catch {}
   emit();
 }
 
-/**
- * Caches the parsed array per raw string.
- *
- * `useSyncExternalStore` compares snapshots by identity and calls the getter
- * on every render, so returning a fresh array each time is an infinite loop.
- */
 const snapshots = new Map<string, { raw: string | null; value: string[] }>();
 
 function getSnapshot(key: string): string[] {
@@ -103,7 +86,6 @@ export function useRecent(): string[] {
   return useList(RECENT_KEY);
 }
 
-/** Called when a tool page opens. Most-recent first, deduplicated, capped. */
 export function noteVisit(id: string) {
   const current = read(RECENT_KEY).filter((v) => v !== id);
   write(RECENT_KEY, [id, ...current].slice(0, RECENT_LIMIT));
@@ -111,7 +93,6 @@ export function noteVisit(id: string) {
 
 const VALUES_PREFIX = "tools-values:";
 
-/** The raw stored option values of a tool, or null. A string so it can be a stable snapshot. */
 export function readToolValues(toolId: string): string | null {
   try {
     return localStorage.getItem(VALUES_PREFIX + toolId);
@@ -134,7 +115,6 @@ export function parseToolValues(
   }
 }
 
-/** Remembers a tool's settings in this browser; an empty set forgets them. */
 export function writeToolValues(
   toolId: string,
   values: Record<string, unknown>,

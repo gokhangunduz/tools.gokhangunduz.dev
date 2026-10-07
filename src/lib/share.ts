@@ -1,17 +1,5 @@
-/**
- * Keeps the tool's input in the URL fragment.
- *
- * The fragment, not the query string: a `#` is never sent to the server, so a
- * shared link carries a JWT or a private payload without it ever reaching a
- * log. That is the same promise the footer makes about the tools themselves.
- *
- * Large inputs are dropped rather than encoded. A megabyte of pasted JSON in
- * the address bar is a link nobody can send and a history entry that costs
- * more than it returns.
- */
 const MAX_SHARE_BYTES = 4096;
 
-/** Base64url over UTF-8 — `encodeURIComponent` alone triples the length of Turkish text. */
 export function encode(value: string): string {
   const bytes = new TextEncoder().encode(value);
   let binary = "";
@@ -29,8 +17,6 @@ function decode(value: string): string | null {
     const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
     return new TextDecoder().decode(bytes);
   } catch {
-    // A hand-edited or truncated fragment: open the tool empty rather than
-    // showing an error about a link the user did not type.
     return null;
   }
 }
@@ -41,22 +27,16 @@ export type SharedState = {
   options?: Record<string, unknown>;
 };
 
-/** Only the browser's own fragment changes matter; our own writes replace it. */
 export function subscribeShared(onChange: () => void) {
   window.addEventListener("hashchange", onChange);
   return () => window.removeEventListener("hashchange", onChange);
 }
 
-/** The raw fragment, a stable snapshot for `useSyncExternalStore`. */
 export function readSharedHash(): string {
   if (typeof window === "undefined") return "";
   return window.location.hash.slice(1);
 }
 
-/**
- * `i=` carries the input alone (links from the search box); `s=` carries
- * `{ i, d, o }`: the input, the direction and the options that differ.
- */
 export function parseShared(hash: string): SharedState | null {
   if (hash.startsWith("i=")) {
     const input = decode(hash.slice(2));
@@ -87,7 +67,6 @@ export function readShared(): SharedState | null {
   return parseShared(readSharedHash());
 }
 
-/** The fragment for a state, without the `#`, or "" when it is empty or too long. */
 export function formatShared({
   input,
   direction,
@@ -101,7 +80,6 @@ export function formatShared({
   return encoded.length <= MAX_SHARE_BYTES ? `s=${encoded}` : "";
 }
 
-/** Replaces the fragment without adding a history entry, so Back still leaves the tool. */
 export function writeShared(state: SharedState) {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
@@ -111,7 +89,6 @@ export function writeShared(state: SharedState) {
   window.history.replaceState(null, "", url.toString().replace(/#$/, ""));
 }
 
-/** The fragment a link should carry for this value, or an empty string if it is too long. */
 export function encodeShared(value: string): string {
   const encoded = encode(value);
   return encoded.length <= MAX_SHARE_BYTES ? encoded : "";
