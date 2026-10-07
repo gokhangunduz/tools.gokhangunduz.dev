@@ -1,13 +1,5 @@
 import { ToolError } from "@/tools/text-tool";
 
-/**
- * Canvas work shared by the image tools.
- *
- * `createImageBitmap` rather than an `<img>` and a load event: it decodes off
- * the main thread, it reports a broken file as a rejection instead of a
- * silent zero-size image, and it does not need the element to be in the
- * document.
- */
 export async function decode(file: File): Promise<ImageBitmap> {
   try {
     return await createImageBitmap(file);
@@ -44,8 +36,6 @@ export async function encode(
     });
   }
 
-  // Downscaling in one step is blurry past about 2×; the browser's own
-  // smoothing at high quality is the compromise that keeps this simple.
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
   context.drawImage(bitmap, 0, 0, width, height);
@@ -61,8 +51,6 @@ export async function encode(
     });
   }
 
-  // Safari falls back to PNG rather than failing when asked for an
-  // unsupported type, so the result is checked rather than trusted.
   if (blob.type !== type) {
     throw new ToolError({
       tr: `Tarayıcın ${type} yazamıyor; ${blob.type} üretti.`,
@@ -88,7 +76,6 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-/** The pixel size of an image the browser can display, or null when it cannot. */
 export function naturalSize(
   src: string,
 ): Promise<{ width: number; height: number } | null> {

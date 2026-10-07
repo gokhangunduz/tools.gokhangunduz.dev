@@ -1,13 +1,6 @@
 import type { Localized } from "@/i18n";
 import { positionAt, ToolError } from "@/tools/text-tool";
 
-/**
- * One JSON parser for every tool that takes JSON.
- *
- * `JSON.parse` does the parsing. Its message differs per browser and some
- * carry no position at all, so when it fails the input is scanned again here
- * to find where and why, in both languages.
- */
 export function parseJson(input: string): unknown {
   try {
     return JSON.parse(input);
@@ -25,7 +18,6 @@ export function parseJson(input: string): unknown {
   }
 }
 
-/** Rejects a top-level array or scalar where a tool needs an object. */
 export function parseJsonObject(input: string): Record<string, unknown> {
   const value = parseJson(input);
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -85,10 +77,6 @@ const MESSAGES = {
   empty: { tr: "girdi boş", en: "the input is empty" },
 } satisfies Record<string, Localized>;
 
-/**
- * Where and why `input` is not JSON, or null if it is. Only called after
- * `JSON.parse` has failed, so it favours a helpful message over speed.
- */
 export function locateJsonError(input: string): JsonProblem | null {
   let i = 0;
 
@@ -222,8 +210,7 @@ export function locateJsonError(input: string): JsonProblem | null {
   } catch (stop) {
     if (stop instanceof Stop)
       return { offset: stop.offset, message: stop.message };
-    // Nesting deep enough to exhaust the stack: JSON.parse has already said
-    // no, so report it without a position.
+
     return null;
   }
 }
