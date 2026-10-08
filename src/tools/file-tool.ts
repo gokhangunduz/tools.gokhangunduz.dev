@@ -11,30 +11,19 @@ import {
 export type FileStats = { before: number; after: number };
 
 export type FileResult = {
-  /** Shown in the output box. */
   text?: string;
-  /** Offered as a download, and previewed when it is an image. */
+
   blob?: Blob;
   filename?: string;
-  /** Previewed instead of `blob`, e.g. a data URI the tool already built. */
+
   previewUrl?: string;
-  /** Byte sizes of the input and the output, shown as the result's headline. */
+
   stats?: FileStats;
-  /** One line under the result. */
+
   note?: Localized;
 };
 
-/**
- * The contract for tools whose input is a file.
- *
- * Image conversion, QR reading, EXIF: the input is picked or dropped rather
- * than typed, and the result may be a new file rather than text. Everything
- * happens in the page — `FileReader` and a canvas — so the file never leaves
- * the machine, which for photographs matters more than for most things this
- * site does.
- */
 export type FileToolSpec = {
-  /** The `accept` attribute, e.g. "image/*". */
   accept: string;
   run: (
     file: File,
@@ -51,7 +40,6 @@ const FAMILIES: Record<string, Localized> = {
   video: { tr: "her video dosyası", en: "any video file" },
 };
 
-/** The `accept` list as a reader would say it: "SVG, PNG" or "any image format". */
 export function acceptLabel(accept: string): Localized {
   const parts = { tr: [] as string[], en: [] as string[] };
   const add = (value: Localized) => {
@@ -84,10 +72,6 @@ export function acceptLabel(accept: string): Localized {
   return { tr: parts.tr.join(", "), en: parts.en.join(", ") };
 }
 
-/**
- * The file to use out of those dropped or pasted: the first one the tool
- * accepts, and how many others were left out.
- */
 export function chooseFile<F extends { name: string; type: string }>(
   files: readonly F[],
   accept: string,
@@ -105,7 +89,6 @@ export function chooseFile<F extends { name: string; type: string }>(
   return { file, ignored: files.length - 1 };
 }
 
-/** The saving (or growth) from input to output, as a badge. */
 export function statsHeadline({ before, after }: FileStats): {
   text: Localized;
   tone: Tone;
