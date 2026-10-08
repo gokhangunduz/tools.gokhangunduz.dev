@@ -1,6 +1,5 @@
 import type { Category, CategoryId } from "./types";
 
-/** Display order on the home page, chosen by how often each group is reached for. */
 export const CATEGORIES: Category[] = [
   {
     id: "data",

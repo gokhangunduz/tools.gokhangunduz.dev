@@ -1,17 +1,5 @@
 import type { Localized } from "@/i18n";
 
-/**
- * Recognises what was pasted into the search box.
- *
- * The box says "search tools, or paste something", and this is the half that
- * makes that true: a JWT, a hash, a timestamp or a base64 blob is matched to
- * the tool that reads it, so the common case — you have a value and do not
- * know what it is — takes one paste instead of a guess at a tool name.
- *
- * Order matters: a JWT is also valid base64url, and a hex digest is also a
- * valid hex string, so the specific patterns are tested before the general
- * ones.
- */
 export type Detection = {
   toolId: string;
   label: Localized;
@@ -111,16 +99,13 @@ const RULES: Rule[] = [
       value.length >= 12 &&
       value.length % 4 === 0 &&
       /^[A-Za-z0-9+/]+={0,2}$/.test(value) &&
-      // A string of only hex digits is far more likely to be bytes than a
-      // base64 payload that happens to avoid every other letter.
       !/^[0-9a-f]+$/i.test(value),
   },
 ];
 
 export function detect(input: string): Detection | null {
   const value = input.trim();
-  // Below this length almost anything matches something, and a suggestion
-  // that fires while you are still typing a tool's name is noise.
+
   if (value.length < 8) return null;
 
   const rule = RULES.find((entry) => entry.test(value));
