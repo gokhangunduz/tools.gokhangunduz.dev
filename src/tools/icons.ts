@@ -36,15 +36,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-/**
- * Icons are named, not imported, by tool metadata.
- *
- * A `ToolMeta` crosses the server/client boundary — the home page renders on
- * the server, the favourites row on the client — and a React component is not
- * serializable, so holding the component itself in the registry made every
- * list a client component. A string does not have that problem, and this map
- * is the one place that turns it back into something renderable.
- */
 export const ICONS = {
   arrowLeftRight: ArrowLeftRight,
   binary: Binary,

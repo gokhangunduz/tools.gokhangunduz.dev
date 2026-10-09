@@ -32,14 +32,6 @@ import { meta as textDiff } from "./text-diff/meta";
 import { meta as urlEncode } from "./url-encode/meta";
 import { meta as urlParse } from "./url-parse/meta";
 
-/**
- * Every tool on the site, in one list.
- *
- * Adding a tool is a folder under `src/tools/` and one line here; the home
- * page, the search box, the command palette, the sitemap, the per-page
- * metadata and the sidebar are all derived from this array.
- * Nothing else enumerates tools.
- */
 export const TOOLS: ToolMeta[] = [
   base64Text,
   urlEncode,
@@ -81,17 +73,6 @@ export function getTool(id: string): ToolMeta | undefined {
   return TOOL_BY_ID.get(id);
 }
 
-/**
- * Ranks tools against what was typed.
- *
- * Both languages' names and keywords are searched whichever locale is active:
- * the words people reach for here are English half the time even in Turkish
- * ("hash", "encode"), and a search that finds nothing because the interface is
- * in the other language is the fastest way to lose someone.
- *
- * Every word of the query has to match somewhere, so "json yaml" or
- * "base64 decode" narrows rather than finding nothing.
- */
 export function searchTools(query: string, locale: Locale): ToolMeta[] {
   const needle = normalize(query);
   const tokens = tokenize(needle);
@@ -120,12 +101,6 @@ function tokenize(needle: string): string[] {
     .filter((token) => token && !STOP_WORDS.has(token));
 }
 
-/**
- * Case- and accent-insensitive, so "cozumle" finds "çözümle".
- *
- * Turkish needs the explicit locale: the default lowercase maps "I" to "i"
- * rather than "ı", which breaks half the words that start with it.
- */
 function normalize(value: string): string {
   return value
     .toLocaleLowerCase("tr")
