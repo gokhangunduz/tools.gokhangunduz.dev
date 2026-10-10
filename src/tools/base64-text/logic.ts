@@ -1,18 +1,9 @@
 import type { Localized } from "@/i18n";
 import { positionAt, ToolError } from "../text-tool";
 
-/**
- * Base64 over UTF-8, both alphabets.
- *
- * `btoa` works on Latin-1 code units, so passing it Turkish text throws and
- * passing it the output of `encodeURIComponent` silently encodes the wrong
- * bytes. Going through `TextEncoder` is the only version that round-trips
- * "Şükrü" and an emoji alike.
- */
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
-  // In chunks: `String.fromCharCode(...bytes)` blows the argument limit
-  // somewhere around 100 KB, which a pasted certificate reaches easily.
+
   const CHUNK = 0x8000;
   for (let i = 0; i < bytes.length; i += CHUNK) {
     binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
@@ -21,9 +12,8 @@ function toBase64(bytes: Uint8Array): string {
 }
 
 export type Base64Options = {
-  /** `-` and `_` instead of `+` and `/`, and no padding. */
   urlSafe: boolean;
-  /** Wrap at 76 characters, as MIME does. */
+
   wrap: boolean;
 };
 
@@ -50,7 +40,6 @@ const INVALID = {
   en: "Not a valid Base64 value.",
 };
 
-/** The first character that cannot be Base64, as an offset into `input`. */
 function firstInvalid(input: string, start: number): number {
   let padding = -1;
   for (let i = start; i < input.length; i++) {
@@ -98,7 +87,6 @@ export function decodeBytes(input: string): Uint8Array {
 
   let binary: string;
   try {
-    // `atob` accepts unpadded input in some engines and rejects it in others.
     binary = atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="));
   } catch {
     throw new ToolError(INVALID);
@@ -156,7 +144,6 @@ function format(value: number, locale: "tr" | "en"): string {
   return value.toLocaleString(locale);
 }
 
-/** "19 bayt → 28 karakter (+%47)" for encode, "28 karakter → 19 bayt" for decode. */
 export function sizeHeadline(
   direction: "encode" | "decode",
   input: string,

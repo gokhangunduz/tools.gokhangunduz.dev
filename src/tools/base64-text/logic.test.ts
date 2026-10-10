@@ -16,7 +16,6 @@ describe("encodeBase64", () => {
   });
 
   it("encodes UTF-8 rather than Latin-1", () => {
-    // btoa("Şükrü") throws; the whole point of the TextEncoder path.
     expect(encodeBase64("Şükrü", plain)).toBe("xZ7DvGtyw7w=");
   });
 
@@ -34,7 +33,7 @@ describe("encodeBase64", () => {
     const lines = encodeBase64("a".repeat(120), { urlSafe: false, wrap: true })
       .split("\n")
       .filter(Boolean);
-    // 120 bytes encode to 160 characters: two full lines and a remainder.
+
     expect(lines[0]).toHaveLength(76);
     expect(lines.length).toBe(3);
     expect(lines.at(-1)).toHaveLength(8);
@@ -65,7 +64,6 @@ describe("decodeBase64", () => {
   });
 
   it("rejects bytes that are not UTF-8 text", () => {
-    // 0xFF is never a valid UTF-8 lead byte.
     expect(() => decodeBase64("/w==")).toThrow();
   });
 
