@@ -44,7 +44,6 @@ describe("convertCase", () => {
   });
 
   it("uses Turkish casing for prose by default", () => {
-    // The whole point: "I" lowercases to "ı" and "i" uppercases to "İ".
     expect(convertCase("IŞIK", "lower", true)).toBe("ışık");
     expect(convertCase("istanbul", "upper", true)).toBe("İSTANBUL");
   });

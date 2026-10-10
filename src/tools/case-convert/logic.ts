@@ -29,7 +29,6 @@ const LETTERS: Record<string, string> = {
 
 const MAPPED = new RegExp(`[${Object.keys(LETTERS).join("")}]`, "g");
 
-/** Latin letters without their accents: "Işık Çağrı" → "Isik Cagri", "Straße" → "Strasse". */
 export function transliterate(value: string): string {
   return value
     .replace(MAPPED, (character) => LETTERS[character])
@@ -37,17 +36,6 @@ export function transliterate(value: string): string {
     .replace(/\p{M}/gu, "");
 }
 
-/**
- * The naming conventions, with Turkish casing done properly.
- *
- * `"I".toLowerCase()` is "i" in every locale except Turkish, where it is "ı" —
- * and `"i".toUpperCase()` is "İ". Prose styles (BÜYÜK, küçük, Title,
- * Sentence) follow the Turkish rules by default because this is a Turkish
- * site. Identifier styles always use the English rules: `user_id` has to
- * become `userId`, never `userİd`, or the code does not compile.
- *
- * Every style works line by line, so a pasted list converts as a list.
- */
 export type Style =
   | "camel"
   | "pascal"
@@ -108,7 +96,6 @@ function codeCase(line: string, style: Style): string {
   }
 }
 
-// English lowercasing turns "İ" into "i" plus a combining dot; plain "i" is what an identifier wants.
 function lower(word: string): string {
   return word.replace(/İ/g, "i").toLocaleLowerCase("en");
 }
@@ -117,7 +104,6 @@ function capitalize(word: string): string {
   return word.slice(0, 1).toLocaleUpperCase("en") + lower(word.slice(1));
 }
 
-/** Splits on separators and on the humps: "getHTTPResponse" → get, HTTP, Response. */
 export function splitWords(input: string): string[] {
   return input
     .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, "$1 $2")
@@ -126,13 +112,11 @@ export function splitWords(input: string): string[] {
     .filter(Boolean);
 }
 
-/** An acronym such as API or JSON, which a title or a sentence keeps as written. */
 function isAcronym(word: string): boolean {
   const letters = word.replace(/[^\p{L}]/gu, "");
   return letters.length >= 2 && !/\p{Ll}/u.test(letters);
 }
 
-/** A line that is all capitals is shouting, not a row of acronyms. */
 function keepsAcronyms(line: string): boolean {
   return /\p{Ll}/u.test(line);
 }

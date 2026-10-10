@@ -11,10 +11,6 @@ import { convertCase } from "./logic";
 import { OPTIONS, PLACEHOLDER, SAMPLE, STYLES } from "./spec";
 import { useLinkState } from "./use-link-state";
 
-/**
- * Every style at once, one row each, because the question is usually "which
- * of these do I want" rather than "convert to X".
- */
 export default function Tool({ locale }: { locale: Locale }) {
   const { input, values, setInput, setOption } = useLinkState(OPTIONS);
   const [copied, setCopied] = useState<string | null>(null);
