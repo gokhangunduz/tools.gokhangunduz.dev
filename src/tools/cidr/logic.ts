@@ -1,14 +1,6 @@
 import type { Locale, Localized } from "@/i18n";
 import { ToolError, type ResultRow, type TextResult } from "../text-tool";
 
-/**
- * What an IPv4 CIDR block actually covers.
- *
- * The usable-host count is where this is worth more than arithmetic in your
- * head: IPv4 loses two addresses to the network and broadcast, /31 is a
- * point-to-point link with two usable addresses and no broadcast, and /32 is
- * one host. Getting that wrong is how a subnet ends up one address short.
- */
 export type Cidr = {
   address: number;
   prefix: number;
@@ -84,7 +76,6 @@ function prefixLength(text: string): number {
   return Number(text);
 }
 
-/** A dotted netmask to its prefix length, provided its one-bits are contiguous. */
 export function maskPrefix(text: string): number {
   const mask = toNumber(parseIpv4(text));
   const hostBits = ~mask >>> 0;
@@ -181,7 +172,6 @@ function kind(value: number): Localized {
   return PUBLIC;
 }
 
-/** RFC 1918 and friends, checked at both ends so a block that straddles two says so. */
 export function classify(network: number, broadcast: number): Localized {
   const start = kind(network);
   const end = kind(broadcast);
@@ -238,7 +228,6 @@ export function describeCidr(input: string, locale: Locale): TextResult {
   };
 }
 
-/** Said out loud when the address typed is inside the block rather than its start. */
 export function hostNote(input: string): Localized | null {
   const cidr = parseCidr(input);
   if (!cidr || cidr.prefix >= 31 || cidr.address === cidr.network) return null;
