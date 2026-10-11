@@ -21,11 +21,6 @@ import {
   type ToolOption,
 } from "../text-tool";
 
-/**
- * The input and options of a tool with its own page, kept in the link the way
- * TextTool keeps them: read from the fragment until the page is touched, then
- * written back to it.
- */
 export function useLinkState(options: ToolOption[]) {
   const hash = useSyncExternalStore(subscribeShared, readSharedHash, () => "");
   const shared = useMemo(() => parseShared(hash), [hash]);
