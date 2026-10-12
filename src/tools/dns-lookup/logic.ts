@@ -7,14 +7,6 @@ import {
 } from "../text-tool";
 import { parseIp } from "../ip-geo/logic";
 
-/**
- * DNS over HTTPS, straight from the browser.
- *
- * Cloudflare's resolver answers with `Access-Control-Allow-Origin: *`, so this
- * needs no proxy of our own — which is what keeps the site's promise intact:
- * the query goes from the visitor's browser to a public resolver, and nothing
- * passes through anything of ours.
- */
 export const RECORD_TYPES = [
   "A",
   "AAAA",
@@ -31,7 +23,6 @@ export const RECORD_TYPES = [
 export type RecordType = (typeof RECORD_TYPES)[number];
 export type Query = RecordType | "ALL";
 
-/** What "all" asks for: the types a domain usually has, in parallel. */
 export const COMMON_TYPES: RecordType[] = [
   "A",
   "AAAA",
@@ -107,14 +98,12 @@ export function buildUrl(name: string, type: RecordType): string {
 }
 
 export type Target = {
-  /** The name sent to the resolver: punycode, or a reverse-lookup name. */
   name: string;
-  /** What the person typed, reduced to a host. */
+
   typed: string;
   reverse: boolean;
 };
 
-/** The IP's in-addr.arpa or ip6.arpa name, or null when the text is not an IP. */
 export function reverseName(text: string): string | null {
   let ip;
   try {
@@ -133,11 +122,6 @@ export function reverseName(text: string): string | null {
   return `${nibbles.join(".")}.ip6.arpa`;
 }
 
-/**
- * A host from whatever was pasted: a URL loses its scheme, port, path and
- * query, an internationalised name becomes punycode, and an IP becomes the
- * name its PTR record lives under.
- */
 export function parseTarget(input: string): Target | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
@@ -181,7 +165,6 @@ function invalidName() {
   });
 }
 
-/** A note about what was actually asked, when it is not what was typed. */
 export function targetNote(input: string): Localized | null {
   let target: Target | null;
   try {
@@ -256,7 +239,6 @@ function notice(label: string, text: Localized, locale: Locale): ResultRow {
   return { label, value: text[locale], tone: "muted", copy: false };
 }
 
-/** An rcode other than NOERROR, as a notice with nothing to copy. */
 function rcodeResult(status: number, locale: Locale): TextResult {
   const [name, text] = RCODES[status] ?? [
     `RCODE ${status}`,
@@ -302,7 +284,6 @@ export function formatResponse(
   };
 }
 
-/** Several answers merged: grouped by record type, with the empty types said out loud. */
 export function formatAll(
   bodies: DohResponse[],
   query: string,
@@ -405,7 +386,6 @@ export async function lookup(
   );
 }
 
-/** "3 records", from the dig-format text. */
 export function recordCount(output: string): Localized | null {
   const count = output ? output.split("\n").length : 0;
   if (count === 0) return null;
