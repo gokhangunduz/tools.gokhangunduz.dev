@@ -3,14 +3,6 @@ import { ToolError } from "../text-tool";
 import { relative } from "../timestamp/logic";
 import { requireZone, wallClockIn, isoInZone } from "../timezone/zones";
 
-/**
- * A cron expression in words, and the next times it will actually fire.
- *
- * The sentence alone is not enough: "0 0 31 2 *" reads fine and never runs,
- * and a five-field expression with a day-of-month *and* a day-of-week is an
- * OR, not an AND, which is the single most common way a schedule surprises
- * someone. Printing the next runs is what makes those visible.
- */
 export type Syntax = "unix" | "seconds" | "quartz";
 export type SyntaxChoice = Syntax | "auto";
 
@@ -103,7 +95,6 @@ export const PRESETS: { expression: string; label: Localized }[] = [
 
 export type CronField = { name: Localized; value: string };
 
-/** A validation error that points at one field of the expression. */
 export class CronFieldError extends ToolError {
   readonly index: number;
   constructor(localized: Localized, index: number) {
@@ -114,14 +105,13 @@ export class CronFieldError extends ToolError {
 
 export type Split = {
   syntax: Syntax;
-  /** Auto-detection chose Quartz, whose day-of-week numbering starts at 1 = Sunday. */
+
   quartzDetected: boolean;
   tokens: string[];
   fields: CronField[];
   expression: string;
 };
 
-/** The fields of an expression under the chosen or detected syntax. */
 export function splitCron(
   input: string,
   choice: SyntaxChoice = "auto",
@@ -271,7 +261,6 @@ function validateField(
   }
 }
 
-/** Every field checked against its range, so the message can name the field. */
 export function validateCron(split: Split) {
   const layout = LAYOUT[split.syntax];
   split.tokens.forEach((token, index) =>
@@ -317,7 +306,7 @@ export type Explanation = {
   sentence: string;
   warnings: Warning[];
   runs: CronRun[];
-  /** The runs could not be listed; the sentence and fields still stand. */
+
   runsError: ToolError | null;
   zone: string | null;
   text: string;
