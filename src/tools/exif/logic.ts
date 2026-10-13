@@ -2,13 +2,6 @@ import piexif from "piexifjs";
 import type { Localized } from "@/i18n";
 import { ToolError, type ResultRow } from "../text-tool";
 
-/**
- * Reading, editing and stripping a JPEG's EXIF, as pure functions over bytes.
- *
- * Only the header (everything before the scan data) is ever turned into the
- * binary string piexifjs works on; the compressed image is carried through
- * untouched, so a 20 MB photo costs what its few kilobytes of metadata cost.
- */
 export type FieldId =
   | "Make"
   | "Model"
@@ -83,9 +76,8 @@ export type ExifObject = Record<string, Record<number, unknown>>;
 export type FieldValues = Record<FieldId, string>;
 
 export type Jpeg = {
-  /** SOI up to, not including, the SOS marker, as a binary string. */
   head: string;
-  /** The SOS marker onwards, never touched. */
+
   body: Uint8Array;
 };
 
@@ -118,7 +110,6 @@ const WRITE_FAILED: Localized = {
   en: 'Could not write the EXIF; some tags in this photo are not supported. "Strip all EXIF and download" still works.',
 };
 
-/** The first JPEG among dropped or pasted files, and how many others were left out. */
 export function pickJpeg<F extends { name: string; type: string }>(
   files: readonly F[],
 ): { file: F; ignored: number } {
@@ -151,7 +142,6 @@ export function fromBinary(binary: string): Uint8Array {
   return bytes;
 }
 
-/** Splits a JPEG at its first scan, checking the marker structure on the way. */
 export function splitJpeg(bytes: Uint8Array): Jpeg {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) throw new ToolError(NOT_JPEG);
   let at = 2;
@@ -180,7 +170,6 @@ export function joinJpeg({ head, body }: Jpeg): Uint8Array {
   return out;
 }
 
-/** The header's segments, each with its marker and length bytes. */
 function segments(head: string): string[] {
   const out: string[] = [];
   let at = 2;
@@ -202,7 +191,6 @@ const isXmp = (segment: string) =>
 const xmpHasLocation = (segment: string) =>
   isXmp(segment) && /GPS(Latitude|Longitude)/.test(segment);
 
-/** piexifjs refuses a header that does not end in a scan, so one is lent and taken back. */
 function withScan<T>(head: string, run: (jpeg: string) => T): T {
   return run(`${head}\xff\xda`);
 }
@@ -233,7 +221,6 @@ export function inspect(bytes: Uint8Array): Inspected {
   };
 }
 
-/** Pulls the editable fields out of a piexifjs object, as readable text. */
 export function readFields(exif: ExifObject): FieldValues {
   const values = {} as FieldValues;
   for (const field of FIELDS) {
@@ -244,7 +231,6 @@ export function readFields(exif: ExifObject): FieldValues {
   return values;
 }
 
-/** Writes them back, dropping a tag entirely when its value is cleared. */
 export function writeFields(
   exif: ExifObject,
   values: FieldValues,
@@ -268,7 +254,6 @@ export function writeFields(
   return next;
 }
 
-/** The fields whose value differs from what the file holds. */
 export function changedFields(
   before: FieldValues,
   after: FieldValues,
@@ -280,7 +265,6 @@ export function changedFields(
 
 const DATE = /^(\d{4})[:-](\d{2})[:-](\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/;
 
-/** Checks what can be wrong before writing, and puts the date into EXIF's form. */
 export function normalizeFields(values: FieldValues): FieldValues {
   const date = values.DateTimeOriginal.trim();
   if (date === "") return values;
@@ -310,7 +294,6 @@ export function normalizeFields(values: FieldValues): FieldValues {
   };
 }
 
-/** The photo with its fields rewritten, and optionally without any location. */
 export function editJpeg(
   { jpeg, exif }: Pick<Inspected, "jpeg" | "exif">,
   values: FieldValues,
@@ -329,10 +312,6 @@ export function editJpeg(
   return joinJpeg({ head, body: jpeg.body });
 }
 
-/**
- * The photo with no EXIF, XMP, IPTC or comment left. The orientation is the
- * one tag put back: without it a phone photo taken upright opens sideways.
- */
 export function stripJpeg({
   jpeg,
   exif,
@@ -363,7 +342,6 @@ export function outputName(
     : { tr: `${base}-temiz${ext}`, en: `${base}-clean${ext}` };
 }
 
-/** The GPS block as decimal degrees, or null when there is none to read. */
 export function describeLocation(exif: ExifObject): string | null {
   const gps = exif.GPS;
   if (!gps) return null;
@@ -383,7 +361,6 @@ function toDegrees(value: unknown, reference: unknown): number | null {
   return reference === "S" || reference === "W" ? -degrees : degrees;
 }
 
-/** What the photo says about itself, for the summary beside the preview. */
 export function summarize(
   exif: ExifObject,
   size: { width: number; height: number } | null,
@@ -463,7 +440,6 @@ function formatDate(value: unknown): string {
   return `${y}-${mo}-${d} ${h}:${mi}:${s}`;
 }
 
-/** ASCII tags hold UTF-8 in practice; a byte string that is not UTF-8 is shown as Latin-1. */
 function decodeText(raw: unknown): string {
   if (raw === undefined || raw === null) return "";
   if (typeof raw !== "string") return String(raw);
