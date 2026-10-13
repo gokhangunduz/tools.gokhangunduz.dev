@@ -37,7 +37,7 @@ const PARSERS: Record<Language, Parser> = {
   },
   json: {
     parser: "json",
-    // Prettier parses JSON with babel and prints it through the estree printer.
+
     load: async () => [
       (await import("prettier/plugins/babel")).default,
       (await import("prettier/plugins/estree")).default,

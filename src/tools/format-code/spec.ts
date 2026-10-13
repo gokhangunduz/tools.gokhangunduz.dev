@@ -28,7 +28,6 @@ const QUOTED = new Set([...SCRIPT, "css", "scss", "less"]);
 
 const chosen = (values: OptionValues) => String(values.language);
 
-// `outputExtension` gets only the options, so the detected language of the last run is kept here.
 let detected: Language = "javascript";
 
 const languageOf = (input: string, values: OptionValues): Language =>
