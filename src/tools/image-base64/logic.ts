@@ -17,11 +17,6 @@ export function isSvg(file: { type: string; name: string }): boolean {
   return file.type === "image/svg+xml" || /\.svg$/i.test(file.name);
 }
 
-/**
- * An SVG as a URL-encoded data URI: shorter than base64 and still readable.
- * Whitespace between tags is collapsed and, when the markup has no single
- * quotes of its own, double quotes become single so they need no escaping.
- */
 export function svgDataUri(svg: string): string {
   let text = svg
     .replace(/^﻿/, "")
@@ -58,7 +53,6 @@ const TOO_LARGE = 10 * 1024;
 
 export type SizeNote = { text: Localized; warn: boolean };
 
-/** Growth is measured on what gets pasted, wrapper included. */
 export function sizeNote(fileSize: number, output: string): SizeNote {
   const size = new TextEncoder().encode(output).length;
   const growth = fileSize > 0 ? Math.round((size / fileSize - 1) * 100) : 0;
