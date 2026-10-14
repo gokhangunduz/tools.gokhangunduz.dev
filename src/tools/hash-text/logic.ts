@@ -1,13 +1,5 @@
 import { ToolError } from "../text-tool";
 
-/**
- * The digests people actually paste into a form field.
- *
- * `hash-wasm` rather than WebCrypto: WebCrypto has no MD5 and no CRC32, and
- * those are most of why someone opens a hashing tool — checking a legacy
- * checksum. It is imported lazily inside each call so the wasm module is
- * fetched when this tool is used and never as part of the page.
- */
 export const ALGORITHMS = [
   "md5",
   "sha1",
@@ -76,7 +68,6 @@ async function runDigest(
 
 export type Digest = { algorithm: Algorithm; name: string; value: string };
 
-/** Every algorithm at once, for identifying a digest of unknown origin. */
 export async function hashAll(
   input: string,
   upper: boolean,
@@ -91,13 +82,11 @@ export async function hashAll(
   );
 }
 
-/** The digests as plain text, one `NAME  value` line each. */
 export function formatDigests(digests: Digest[]): string {
   const width = Math.max(0, ...digests.map((d) => d.name.length));
   return digests.map((d) => `${d.name.padEnd(width)}  ${d.value}`).join("\n");
 }
 
-/** Which algorithm produced `expected`, ignoring case and surrounding space. */
 export function findMatch(
   digests: Digest[],
   expected: string,
@@ -113,7 +102,6 @@ export function utf8Length(input: string): number {
   return new TextEncoder().encode(input).length;
 }
 
-/** An editor's final newline is part of the bytes, and the usual reason a digest does not match. */
 export function hasTrailingNewline(input: string): boolean {
   return /\r?\n$/.test(input);
 }
