@@ -43,7 +43,6 @@ export function unsupportedFormat(format: Format): ToolError {
 
 export type Fit = "width" | "edge";
 
-/** The output size for a limit on the width or on the longer edge; never upscales. */
 export function targetSize(
   width: number,
   height: number,
@@ -59,7 +58,6 @@ export function targetSize(
   };
 }
 
-/** "" means no limit; anything else must be a whole number of pixels. */
 export function parseLimit(value: string): number | null {
   const trimmed = value.trim().replace(/px$/i, "").trim();
   if (!trimmed) return null;
@@ -75,7 +73,6 @@ export function parseLimit(value: string): number | null {
   return Number(trimmed);
 }
 
-/** A CSS hex colour, normalised to #rrggbb. */
 export function parseColor(value: string): string {
   const hex = value.trim().replace(/^#/, "").toLowerCase();
   if (/^[0-9a-f]{3}$/.test(hex)) {
@@ -91,7 +88,6 @@ export function parseColor(value: string): string {
   );
 }
 
-/** Whether any pixel of RGBA data is not fully opaque. */
 export function hasAlpha(data: ArrayLike<number>): boolean {
   for (let i = 3; i < data.length; i += 4) {
     if (data[i] < 255) return true;
@@ -177,7 +173,7 @@ export async function encodeImage(
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, format.mime, quality),
   );
-  // Safari hands back a PNG instead of failing on a type it cannot write.
+
   if (!blob || blob.type !== format.mime) throw unsupportedFormat(format);
   return { blob, width, height, filled };
 }
@@ -198,7 +194,6 @@ function sourceHasAlpha(bitmap: ImageBitmap): boolean {
   return hasAlpha(context.getImageData(0, 0, width, height).data);
 }
 
-/** The formats this browser's canvas can actually write. */
 export async function probeFormats(): Promise<Set<string>> {
   const canvas = document.createElement("canvas");
   canvas.width = 1;

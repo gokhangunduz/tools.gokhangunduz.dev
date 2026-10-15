@@ -13,13 +13,6 @@ import {
   type Fit,
 } from "./logic";
 
-/**
- * Format conversion and downscaling in one tool, because they are the same
- * decision: making an image smaller for the web.
- *
- * `supported` is what the browser's canvas can write, probed on mount; until
- * then every format is offered and a failed one is reported by name.
- */
 export function makeSpec(supported: Set<string> | null): FileToolSpec {
   return {
     accept: "image/*",
