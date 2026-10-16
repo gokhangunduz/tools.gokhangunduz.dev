@@ -1,15 +1,6 @@
 import type { Locale, Localized } from "@/i18n";
 import { ToolError, type ResultRow, type TextResult } from "../text-tool";
 
-/**
- * Where an address is, roughly, and who announces it.
- *
- * ipwho.is answers with permissive CORS and needs no key. The accuracy of any
- * of these services is city-level at best and frequently wrong about VPN exit
- * nodes, so the output says what it is rather than implying a street address.
- * Addresses that have no place on the internet are answered here, without a
- * request.
- */
 type Result = {
   success?: boolean;
   message?: string;
@@ -42,7 +33,6 @@ function parseIpv4(text: string): number[] | null {
   return octets.every((octet) => octet <= 255) ? octets : null;
 }
 
-/** The eight 16-bit groups of an IPv6 address, or null. */
 function parseIpv6(text: string): number[] | null {
   if (!/^[0-9a-f:.]+$/i.test(text)) return null;
   let head = text;
@@ -223,7 +213,6 @@ function inRange(
   return true;
 }
 
-/** Why an address has no location, or null when it is an ordinary public one. */
 export function localRange(ip: ParsedIp): Range | null {
   if (ip.version === 4) {
     return (
@@ -326,7 +315,6 @@ export function formatResult(
   return { text, rows };
 }
 
-/** City and country code, for the badge beside the result. */
 export function placeOf(output: string): string | null {
   const field = (pattern: RegExp) => pattern.exec(output)?.[1]?.trim();
   const city = field(/^(?:Şehir|City)\s{2,}(.+)$/m);
