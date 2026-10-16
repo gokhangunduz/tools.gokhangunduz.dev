@@ -2,15 +2,6 @@ import type { Localized } from "@/i18n";
 import { parseJson } from "@/lib/json";
 import { positionAt, ToolError } from "../text-tool";
 
-/**
- * JSON and CSV, both directions.
- *
- * CSV is a table, so the JSON side has to be an array of objects — anything
- * else is refused rather than flattened into a shape the user did not ask for.
- * Nested values are written as JSON inside the cell, which is lossy in the
- * sense that it is no longer a table, but it is reversible and it is what
- * every spreadsheet does with them anyway.
- */
 export type JsonToCsvOptions = { delimiter: string; excel?: boolean };
 
 export async function jsonToCsv(
@@ -157,10 +148,6 @@ export async function csvToJson(
 
 const NUMBER = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
 
-/**
- * A cell as the JSON value it looks like. A leading zero (a phone number, a
- * postcode) or more digits than a double holds keeps it a string.
- */
 export function typeCell(cell: string | undefined): unknown {
   if (cell === undefined || cell === "") return null;
   if (/^(?:true|TRUE|True)$/.test(cell)) return true;
