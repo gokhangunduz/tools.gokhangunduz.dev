@@ -2,19 +2,6 @@ import type { Localized } from "@/i18n";
 import { parseJson } from "@/lib/json";
 import { ToolError } from "../text-tool";
 
-/**
- * A structural diff of two JSON documents.
- *
- * A text diff of JSON reports a reordered key as a change and a reformatted
- * file as a rewrite. This compares values by path, so the answer is the set of
- * things that actually differ — which is the question being asked when two
- * config files behave differently.
- *
- * Arrays are aligned by their longest common subsequence, so an item inserted
- * at the front is one addition rather than a change at every index. Objects
- * that carry an `id` (or a `key`) are matched on it, so an edited item is a
- * change inside it rather than a removal and an addition.
- */
 export type Change = {
   path: string;
   kind: "added" | "removed" | "changed";
@@ -29,7 +16,6 @@ const SIDE_NAMES: Record<Side, Localized> = {
   right: { tr: "Yeni JSON", en: "After" },
 };
 
-/** Parses one side, and names that side and the position when it is not JSON. */
 export function parseSide(text: string, side: Side): unknown {
   try {
     return parseJson(text);
@@ -46,7 +32,6 @@ export function parseSide(text: string, side: Side): unknown {
   }
 }
 
-/** The changes between two documents, or null while either side is blank. */
 export function diffJson(
   leftText: string,
   rightText: string,
@@ -87,7 +72,6 @@ export function compare(
   return [{ path, kind: "changed", left, right }];
 }
 
-/** Every item counts, so [1, 1, 2] against [1, 2] is one removed 1. */
 function compareAsMultiset(
   left: unknown[],
   right: unknown[],
@@ -138,8 +122,6 @@ function compareAligned(
   let i = 0;
   let j = 0;
   const gap = (untilLeft: number, untilRight: number) => {
-    // Unmatched items between two anchors are paired by position first:
-    // [1, 2, 3] against [1, 5, 3] is a changed $[1], not a removal and an addition.
     while (!field && i < untilLeft && j < untilRight) {
       changes.push(
         ...compare(left[i], right[j], `${path}[${j}]`, ignoreArrayOrder),
@@ -164,7 +146,6 @@ function compareAligned(
   return changes;
 }
 
-/** `id` or `key`, when every item is an object that has one; items are then matched on it. */
 function keyField(left: unknown[], right: unknown[]): string | undefined {
   const items = [...left, ...right];
   return ["id", "key"].find(
@@ -179,7 +160,6 @@ function keyField(left: unknown[], right: unknown[]): string | undefined {
   );
 }
 
-/** Index pairs of a longest common subsequence, after the shared ends are taken off. */
 function align(a: string[], b: string[]): [number, number][] {
   const pairs: [number, number][] = [];
   let start = 0;
@@ -222,7 +202,6 @@ function align(a: string[], b: string[]): [number, number][] {
   return [...pairs, ...tail];
 }
 
-/** JSON with sorted keys, so two equal values serialize the same. */
 export function canonical(value: unknown): string {
   return JSON.stringify(sortKeys(value)) ?? "undefined";
 }
@@ -253,7 +232,6 @@ export function show(value: unknown, space?: number): string {
   return JSON.stringify(value, null, space) ?? "undefined";
 }
 
-/** The plain-text form Copy takes: one change per entry, full values. */
 export function formatChanges(changes: Change[]): string {
   return changes
     .map((change) => {
