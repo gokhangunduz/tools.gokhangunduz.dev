@@ -18,7 +18,7 @@ describe("infer", () => {
     expect(items?.kind).toBe("object");
     const fields = items?.kind === "object" ? items.fields : [];
     expect(fields.find((f) => f.name === "a")?.optional).toBe(false);
-    // Present in one element only, so optional.
+
     expect(fields.find((f) => f.name === "b")?.optional).toBe(true);
   });
 });

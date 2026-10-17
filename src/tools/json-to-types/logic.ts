@@ -2,20 +2,13 @@ import type { Localized } from "@/i18n";
 import { parseJson } from "@/lib/json";
 import { infer, pascalCase, type Field, type Inferred } from "./infer";
 
-/**
- * Prints an inferred type as TypeScript, Zod, Go or JSON Schema.
- *
- * Nested objects become named types rather than one deeply inlined shape:
- * an inline type three levels down is unreadable, and a named one is what
- * anyone would have written by hand.
- */
 export type Target = "typescript" | "zod" | "go" | "json-schema";
 
 export type TypesResult = {
   text: string;
-  /** Named declarations printed, for the targets that name them. */
+
   declarations: number | null;
-  /** Fields only ever seen as null, whose real type the sample does not show. */
+
   nullOnly: number;
 };
 
@@ -93,11 +86,6 @@ function countNullOnly(value: Inferred): number {
 
 type ObjectType = Extract<Inferred, { kind: "object" }>;
 
-/**
- * Names for object types: the same shape reuses its name, and a different
- * shape under a name already taken gets its parent's name in front (two
- * `data` objects become `Data` and `OrderData`), then a number.
- */
 function namer(reserved: string[] = []) {
   const bySignature = new Map<string, string>();
   const taken = new Set(reserved);
@@ -118,8 +106,6 @@ function namer(reserved: string[] = []) {
     return { name, fresh: true };
   };
 }
-
-/* ─────────────────────────────────────────────────────────── TypeScript ── */
 
 function printTypeScript(
   root: Inferred,
@@ -183,8 +169,6 @@ function key(field: Field): string {
     : JSON.stringify(field.name);
 }
 
-/* ────────────────────────────────────────────────────────────────── Zod ── */
-
 function printZod(root: Inferred, name: string): string {
   function schema(value: Inferred, indent: string): string {
     switch (value.kind) {
@@ -231,8 +215,6 @@ function printZod(root: Inferred, name: string): string {
   ].join("\n");
 }
 
-/* ─────────────────────────────────────────────────────────────────── Go ── */
-
 const INITIALISMS = new Set([
   "ID",
   "URL",
@@ -247,7 +229,6 @@ const INITIALISMS = new Set([
   "HTML",
 ]);
 
-/** An exported Go identifier, with Go's initialisms: user_id → UserID. */
 export function goName(name: string): string {
   const parts = name
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
@@ -287,8 +268,6 @@ function printGo(
       case "array":
         return `[]${type(value.items, singular(hint), parent)}`;
       case "union":
-        // Go has no sum type; `any` is the honest answer rather than picking
-        // one of the observed types and hoping.
         return "any";
       case "object": {
         const { name: own, fresh } = nameFor(value, hint, parent);
@@ -296,8 +275,7 @@ function printGo(
         const rows = value.fields.map((field) => {
           const fieldName = goName(field.name);
           const goType = type(field.type, fieldName, own);
-          // A pointer for anything optional, so "absent" and "zero value"
-          // stay distinguishable — the reason Go structs get this wrong.
+
           const pointer =
             field.optional && !goType.startsWith("[]") && goType !== "any"
               ? "*"
@@ -330,8 +308,6 @@ function printGo(
     count: declarations.length,
   };
 }
-
-/* ────────────────────────────────────────────────────────── JSON Schema ── */
 
 function jsonSchema(value: Inferred): Record<string, unknown> {
   switch (value.kind) {
@@ -366,7 +342,6 @@ function jsonSchema(value: Inferred): Record<string, unknown> {
   }
 }
 
-/** "Users" → "User", "Addresses" → "Address", so an array's element type gets a sensible name. */
 export function singular(name: string): string {
   if (name.length > 3 && name.endsWith("ies")) return `${name.slice(0, -3)}y`;
   if (/(?:ss|x|ch|sh)es$/.test(name)) return name.slice(0, -2);

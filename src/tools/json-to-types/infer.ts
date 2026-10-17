@@ -1,12 +1,3 @@
-/**
- * Infers a type from a JSON sample.
- *
- * One inference pass, four printers. The interesting part is merging: an array
- * of objects is described by the union of what its elements had, with a field
- * that is missing from any of them marked optional. That is what makes the
- * output usable against a real API response, where the second page of results
- * is the one that reveals `deleted_at` can be null.
- */
 export type Inferred =
   | { kind: "string" }
   | { kind: "number" }
@@ -51,13 +42,11 @@ export function infer(value: unknown): Inferred {
   return { kind: "unknown" };
 }
 
-/** Combines two inferences of the same position into one that covers both. */
 export function merge(a: Inferred, b: Inferred): Inferred {
   if (same(a, b)) return a;
   if (a.kind === "unknown") return b;
   if (b.kind === "unknown") return a;
 
-  // A number seen as both 1 and 1.5 is a number, not a union.
   if (numeric(a) && numeric(b)) return { kind: "number" };
 
   if (a.kind === "array" && b.kind === "array") {
@@ -78,7 +67,7 @@ export function merge(a: Inferred, b: Inferred): Inferred {
             optional: left.optional || right.optional,
           };
         }
-        // Present in one sample and not the other: optional, by definition.
+
         return { name, type: (left ?? right)!.type, optional: true };
       }),
     };
@@ -125,7 +114,6 @@ function same(a: Inferred, b: Inferred): boolean {
   return true;
 }
 
-/** A valid identifier in the target language, derived from a JSON key. */
 export function pascalCase(name: string): string {
   const parts = name.split(/[^A-Za-z0-9]+/).filter(Boolean);
   const joined = parts
