@@ -3,15 +3,10 @@ import { parseJson } from "@/lib/json";
 export type Kind =
   "object" | "array" | "string" | "number" | "boolean" | "null";
 
-/**
- * One value of the document. Scalars keep their text as written, so a
- * 20-digit id or 0.10000000000000001 is shown and copied exactly, not as the
- * double JSON.parse would round it to. Plain data, so a worker can send it.
- */
 export type TreeNode = {
   key: string | number | null;
   kind: Kind;
-  /** A string's decoded value, a number's source text, or true/false/null. */
+
   value: string;
   parent: number;
   depth: number;
@@ -20,7 +15,6 @@ export type TreeNode = {
 
 export type Tree = TreeNode[];
 
-/** Validates with JSON.parse (for its speed and a positioned error), then indexes the text. */
 export function buildTree(input: string): Tree {
   parseJson(input);
   return index(input);
@@ -120,7 +114,6 @@ function index(s: string): Tree {
 
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
-/** One step of a JSONPath: `.name`, `[3]`, or `['first name']` when the key is not an identifier. */
 export function pathSegment(key: string | number): string {
   if (typeof key === "number") return `[${key}]`;
   if (IDENTIFIER.test(key)) return `.${key}`;
@@ -139,7 +132,6 @@ function scalarJson(node: TreeNode): string {
   return node.kind === "string" ? JSON.stringify(node.value) : node.value;
 }
 
-/** A subtree back as JSON, with numbers exactly as they were written. */
 export function nodeJson(tree: Tree, id: number, indent = 2): string {
   const pad = (depth: number) => " ".repeat(indent * depth);
   const out: string[] = [];
@@ -173,7 +165,6 @@ export function isContainer(node: TreeNode): boolean {
   return node.kind === "object" || node.kind === "array";
 }
 
-/** "id, total, paid…" for a collapsed object. */
 export function keysPreview(tree: Tree, id: number, max = 3): string {
   const keys = tree[id].children.slice(0, max).map((c) => String(tree[c].key));
   return keys.join(", ") + (tree[id].children.length > max ? ", …" : "");
@@ -190,10 +181,6 @@ export function groupKey(id: number, start: number): string {
   return `${id}:${start}`;
 }
 
-/**
- * The rows on screen: open containers list their children and end with a
- * closing row; arrays over a hundred items list ranges instead.
- */
 export function flatten(tree: Tree, open: ReadonlySet<string>): Row[] {
   if (tree.length === 0) return [];
   const rows: Row[] = [];
@@ -252,7 +239,6 @@ export function flatten(tree: Tree, open: ReadonlySet<string>): Row[] {
   return rows;
 }
 
-/** Keys that open a node and every ancestor, including the range it sits in. */
 export function revealKeys(tree: Tree, id: number): string[] {
   const keys: string[] = [];
   for (
@@ -270,7 +256,6 @@ export function revealKeys(tree: Tree, id: number): string[] {
   return keys;
 }
 
-/** Every container and range, for "open all". */
 export function allKeys(tree: Tree): string[] {
   const keys: string[] = [];
   tree.forEach((node, id) => {
@@ -285,7 +270,6 @@ export function allKeys(tree: Tree): string[] {
   return keys;
 }
 
-/** The first two levels, which show the shape without unfolding everything. */
 export function initialKeys(tree: Tree): string[] {
   const keys: string[] = [];
   tree.forEach((node, id) => {
@@ -294,7 +278,6 @@ export function initialKeys(tree: Tree): string[] {
   return keys;
 }
 
-/** Nodes whose key or scalar value contains the query, ignoring case. */
 export function search(tree: Tree, query: string, locale = "tr"): number[] {
   const needle = query.trim().toLocaleLowerCase(locale);
   if (!needle) return [];

@@ -17,7 +17,6 @@ const FAILED: Localized = {
   en: "Could not read the JSON.",
 };
 
-/** Above this many characters the parse leaves the main thread. */
 export const LARGE = 200_000;
 
 export function parseHere(input: string): Parsed {

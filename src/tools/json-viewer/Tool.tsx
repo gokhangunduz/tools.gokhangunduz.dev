@@ -109,12 +109,6 @@ const rowCursor = (row: Row): Cursor =>
       ? nodeCursor(row.id)
       : `c${row.id}`;
 
-/**
- * A collapsible tree, for the JSON that is too big to read as text.
- *
- * Only the rows on screen are rendered, so a document of a hundred thousand
- * values scrolls like one of ten; large inputs are parsed in a worker.
- */
 export default function Tool({ locale }: { locale: Locale }) {
   const [input, setInput] = useState("");
   const deferred = useDeferredValue(input);
