@@ -2,16 +2,6 @@ import type { Localized } from "@/i18n";
 import { parseJson } from "@/lib/json";
 import { ToolError } from "../text-tool";
 
-/**
- * JSON and YAML, both directions.
- *
- * The schema is YAML 1.2's JSON schema widened by exactly three things people
- * write in real config files: the core schema's nulls (`~`, `Null`, an empty
- * value), its floats (`.5`) and the `<<` merge key. What it leaves out matters
- * more: YAML 1.1 turns `no`, `off`, `y` and `22:30` into booleans and
- * sexagesimal numbers, which is the Norway problem and the most common way a
- * config file means something other than what it says. Those stay strings.
- */
 export type YamlResult = { text: string; documents: number };
 
 type Yaml = typeof import("js-yaml");
