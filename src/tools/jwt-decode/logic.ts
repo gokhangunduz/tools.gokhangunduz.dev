@@ -1,14 +1,6 @@
 import type { Locale } from "@/i18n";
 import { ToolError } from "../text-tool";
 
-/**
- * Reads a JWT, and optionally checks its signature.
- *
- * Decoding is deliberately separate from verifying: a token can be read
- * without any key, and pretending otherwise is why people paste production
- * tokens into sites that ask for the secret. A failed verification never
- * hides what the token says.
- */
 export const TIME_CLAIMS = ["exp", "iat", "nbf", "auth_time", "updated_at"];
 
 export const SAMPLE_KEY = "demo-secret-demo-secret-demo-1234";
@@ -60,7 +52,6 @@ function decodeSegment(segment: string, which: string): Claims {
   return value as Claims;
 }
 
-/** What people paste: `Bearer eyJ…`, a quoted string from a JSON body, a trailing newline. */
 export function cleanToken(input: string): string {
   const unquote = (value: string) =>
     value
@@ -89,7 +80,6 @@ export function prettyJson(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-/** The download: both halves as one JSON document, values untouched. */
 export function decodedJson({ header, payload }: Decoded): string {
   return prettyJson({ header, payload });
 }
@@ -100,7 +90,6 @@ export type TimeStatus =
   | { state: "notYet"; ms: number }
   | { state: "noExp" };
 
-/** Is this token usable right now? `ms` is signed: until expiry, since expiry, until nbf. */
 export function timeStatus(payload: Claims, now: number): TimeStatus {
   const { exp, nbf } = payload;
   if (typeof nbf === "number" && nbf * 1000 > now) {
@@ -111,7 +100,6 @@ export function timeStatus(payload: Claims, now: number): TimeStatus {
   return ms > 0 ? { state: "valid", ms } : { state: "expired", ms };
 }
 
-/** "in 3 hours", "111 gün sonra", "2.203 gün önce" — the locale's own words. */
 export function formatRelative(ms: number, locale: Locale): string {
   const format = new Intl.RelativeTimeFormat(locale, { numeric: "always" });
   const abs = Math.abs(ms);
@@ -135,7 +123,6 @@ export function formatDate(seconds: number, locale: Locale): string {
   });
 }
 
-/** The note shown after a timestamp claim; it annotates, never replaces. */
 export function timeAnnotation(
   key: string,
   value: unknown,
@@ -180,10 +167,6 @@ async function readKey(
   return new TextEncoder().encode(key);
 }
 
-/**
- * Checks the signature only. Expiry is shown on its own, so an expired token
- * with a good signature reads as exactly that.
- */
 export async function verifyToken(
   input: string,
   key: string,

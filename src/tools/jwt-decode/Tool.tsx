@@ -114,7 +114,6 @@ function fill(template: string, vars: Record<string, string>) {
 
 const noSubscription = () => () => {};
 
-/** A textarea whose text is drawn by a tinted copy behind it, so each segment has its colour. */
 function TokenInput({
   value,
   onChange,
