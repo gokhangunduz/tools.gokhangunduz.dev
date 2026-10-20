@@ -131,12 +131,6 @@ function writeDraft(value: string) {
   } catch {}
 }
 
-/**
- * A Markdown editor with the preview beside it.
- *
- * The preview is rendered with the same GitHub dialect as the converter, and
- * its raw HTML is rebuilt from an allowlist before it reaches the page.
- */
 export default function Tool({ locale }: { locale: Locale }) {
   const stored = useSyncExternalStore(noop, readDraft, () => "");
   const [typed, setTyped] = useState<string | null>(null);

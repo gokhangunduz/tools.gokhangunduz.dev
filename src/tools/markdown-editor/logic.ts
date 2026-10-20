@@ -1,9 +1,3 @@
-/**
- * Raw HTML inside Markdown, rebuilt from an allowlist rather than filtered:
- * every tag that comes out is one written here, with attribute values
- * re-escaped, so nothing the input smuggles in (an `onerror`, a
- * `javascript:` link, a `<script>`) can reach the page.
- */
 const TAGS = new Set([
   "a",
   "abbr",
@@ -117,7 +111,6 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-/** Text between tags: entities stay entities, anything tag-like is shown as text. */
 function escapeText(value: string): string {
   let out = "";
   for (let i = 0; i < value.length; i++) {
@@ -148,7 +141,6 @@ function decodeEntities(value: string): string {
   );
 }
 
-/** A URL a link or image may point at: http(s), mailto for links, or relative. */
 export function safeUrl(url: string, kind: "link" | "image"): string | null {
   const probe = url.replace(/[\u0000- \u007f]/g, "").toLowerCase();
   const scheme = /^([a-z][a-z0-9+.-]*):/.exec(probe);
@@ -220,7 +212,6 @@ export function sanitizeHtml(html: string): string {
   return out + escapeText(html.slice(at));
 }
 
-/** Markdown to HTML that is safe to put into this page. */
 export async function renderMarkdown(input: string): Promise<string> {
   if (!input.trim()) return "";
   const { Marked } = await import("marked");
@@ -250,7 +241,6 @@ export async function renderMarkdown(input: string): Promise<string> {
 
 export type Edit = { text: string; start: number; end: number };
 
-/** Tab indents every selected line by two spaces; Shift+Tab takes up to two away. */
 export function indentLines(
   text: string,
   start: number,
@@ -297,7 +287,6 @@ export function indentLines(
   };
 }
 
-/** Cmd+B, Cmd+I and Cmd+K: wraps the selection, or unwraps it when already wrapped. */
 export function wrapSelection(
   text: string,
   start: number,
@@ -348,7 +337,6 @@ export function countText(text: string): {
   };
 }
 
-/** The first heading, for a downloaded page's title. */
 export function titleOf(markdown: string): string {
   const heading = /^#{1,6}\s+(.+?)\s*#*\s*$/m.exec(markdown);
   return heading ? heading[1].replace(/[*_`[\]]/g, "") : "Markdown";
