@@ -1,18 +1,9 @@
 import { parseJson } from "@/lib/json";
 import { ToolError } from "../text-tool";
 
-/**
- * Signs a token from a payload, for testing an endpoint that expects one.
- *
- * HS256/384/512 only, with a shared secret. RSA signing would mean asking for
- * a private key, and a private key is exactly what should not be pasted into a
- * web page — even one that never sends it anywhere. Verification, where only
- * the public key is needed, lives in the decoder.
- */
 export const ALGORITHMS = ["HS256", "HS384", "HS512"] as const;
 export type Algorithm = (typeof ALGORITHMS)[number];
 
-/** RFC 7518 §3.2: a key at least as long as the hash output. */
 export const MIN_SECRET_BYTES: Record<Algorithm, number> = {
   HS256: 32,
   HS384: 48,
@@ -85,7 +76,6 @@ export function secretBytes(secret: string, base64: boolean): Uint8Array {
   return bytes;
 }
 
-/** The byte count the length warning is about, or null when the secret cannot be read. */
 export function secretLength(secret: string, base64: boolean): number | null {
   try {
     return secretBytes(secret, base64).length;
@@ -104,7 +94,6 @@ export function randomSecret(bytes: number, base64: boolean): string {
     : encoded.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-/** When the token would expire, in epoch seconds, or null for no exp. */
 export function expiryFor(lifetime: Lifetime, now: number): number | null {
   const seconds = LIFETIME_SECONDS[lifetime];
   return seconds === null ? null : Math.floor(now / 1000) + seconds;
@@ -118,11 +107,6 @@ export type Signed = {
   expOverridden: boolean;
 };
 
-/**
- * A payload's own iat and exp win: someone who wrote them meant them. A
- * short secret still signs, with a warning, because a test token signed with
- * the server's actual short secret is the point.
- */
 export async function signToken({
   payload,
   secret,
