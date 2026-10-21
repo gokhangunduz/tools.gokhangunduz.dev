@@ -1,14 +1,6 @@
 import type { Localized } from "@/i18n";
 import { ToolError, type Tone } from "../text-tool";
 
-/**
- * Passwords with the entropy printed next to them.
- *
- * The number is the point: "16 characters" says nothing, "94 bits" says how
- * long an offline attack takes. It is computed from the alphabet actually in
- * use — excluding the ambiguous characters shrinks the alphabet, and the
- * figure has to drop with it rather than flattering the result.
- */
 export const SETS = {
   lower: "abcdefghijklmnopqrstuvwxyz",
   upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -28,11 +20,10 @@ export type Options = {
   digits: boolean;
   symbols: boolean;
   avoidAmbiguous: boolean;
-  /** The symbol set in use; defaults to `SETS.symbols`. */
+
   symbolSet?: string;
 };
 
-/** Each enabled set on its own, after the symbol set and the ambiguity filter. */
 export function enabledSets(options: Options): string[] {
   const symbols = [
     ...new Set((options.symbolSet ?? SETS.symbols).replace(/\s/g, "")),
@@ -90,10 +81,6 @@ export function generatePasswords(options: Options): string {
   ).join("\n");
 }
 
-/**
- * One character from every enabled set, the rest from the whole alphabet,
- * then a Fisher–Yates shuffle so the guaranteed ones are not always first.
- */
 function one(sets: string[], alphabet: string, length: number): string {
   const characters = sets.map((set) => set[randomIndex(set.length)]);
   while (characters.length < length) {
@@ -109,10 +96,6 @@ function one(sets: string[], alphabet: string, length: number): string {
 const pool = new Uint32Array(256);
 let poolIndex = pool.length;
 
-/**
- * Rejection sampling over 32-bit values, so every index is equally likely;
- * `% n` on a raw random value biases the low indexes.
- */
 export function randomIndex(n: number): number {
   const limit = 2 ** 32 - (2 ** 32 % n);
   for (;;) {
@@ -134,10 +117,9 @@ export function entropyBits(options: Options): number {
 const YEAR = 31_536_000;
 const UNIVERSE_YEARS = 1.38e10;
 
-/** What that number means, in the only terms that matter. */
 export function crackTime(bits: number, locale: string): string {
   const tr = locale === "tr";
-  // 1e11 guesses a second: a mid-range GPU rig against a fast hash.
+
   const seconds = 2 ** (bits - 1) / 1e11;
   const years = seconds / YEAR;
   if (years > UNIVERSE_YEARS) {

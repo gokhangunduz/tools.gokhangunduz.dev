@@ -52,8 +52,6 @@ describe("generatePasswords", () => {
   });
 
   it("is not biased towards the start of the alphabet", () => {
-    // 8000 characters from a 26-letter alphabet: a modulo bias would show up
-    // as the first six letters appearing markedly more often.
     const value = generatePasswords({
       ...base,
       upper: false,
