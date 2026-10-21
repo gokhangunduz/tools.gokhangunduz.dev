@@ -1,19 +1,10 @@
 import type { Localized } from "@/i18n";
 import { ToolError } from "../text-tool";
 
-/**
- * A QR code as SVG, so it stays sharp at any size and can be pasted into a
- * document as markup.
- *
- * The error-correction level is exposed because it is the one setting with a
- * real trade-off: a code printed on a label or covered by a logo needs H,
- * and a code on a screen wastes a third of its capacity on it.
- */
 export type Level = "L" | "M" | "Q" | "H";
 
 export const LEVELS: Level[] = ["L", "M", "Q", "H"];
 
-/** Byte-mode capacity of the largest code (version 40) per level. */
 export const CAPACITY: Record<Level, number> = {
   L: 2953,
   M: 2331,
@@ -30,7 +21,6 @@ export type Capacity = {
   tone: "muted" | "warning" | "destructive";
 };
 
-/** "2400 / 2331 bayt · L seviyesinde 2953 sığar" */
 export function capacity(input: string, level: Level): Capacity {
   const bytes = byteLength(input);
   const limit = CAPACITY[level];
@@ -98,12 +88,10 @@ export type Wifi = {
   hidden: boolean;
 };
 
-/** `\ ; , : "` are escaped with a backslash, as the MECARD-style format requires. */
 export function escapeWifi(value: string): string {
   return value.replace(/([\\;,:"])/g, "\\$1");
 }
 
-/** The `WIFI:` payload phones read to join a network. */
 export function wifiPayload({
   ssid,
   password,
@@ -134,7 +122,6 @@ export function wifiPayload({
   return `WIFI:${parts.join(";")};;`;
 }
 
-/** Alt text that says what the code holds without reading out a whole vCard. */
 export function altText(payload: string, locale: "tr" | "en"): string {
   const flat = payload.replace(/\s+/g, " ").trim();
   const short = flat.length > 60 ? `${flat.slice(0, 59)}…` : flat;

@@ -1,7 +1,6 @@
 import { ToolError } from "../text-tool";
 import type { Level } from "./logic";
 
-/** A PNG of the code at a pixel size, drawn by the same library as the SVG. */
 export async function toPng(
   payload: string,
   level: Level,
@@ -35,7 +34,6 @@ export function canCopyImage(): boolean {
   );
 }
 
-/** The promise goes inside the ClipboardItem so Safari keeps the user gesture. */
 export async function copyPng(png: Promise<Blob>): Promise<boolean> {
   try {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
