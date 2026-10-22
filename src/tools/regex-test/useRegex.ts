@@ -23,11 +23,6 @@ function spawn(): Worker | null {
   }
 }
 
-/**
- * Runs the pattern in a worker. A run that has not answered in 500 ms is
- * killed with its worker, since a backtracking pattern never yields and the
- * page would freeze with it; the next run gets a fresh worker.
- */
 export function useRegex(request: RegexRequest | null): Answer | null {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const worker = useRef<Worker | null>(null);
@@ -69,7 +64,7 @@ export function useRegex(request: RegexRequest | null): Answer | null {
       setAnswer({ request, outcome: event.data.outcome });
     };
     current.postMessage({ id, request });
-    // `key` stands for `request`, which is a fresh object on every render.
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 

@@ -1,13 +1,5 @@
 import type { Localized } from "@/i18n";
 
-/**
- * A regular expression against a body of text, with what it matched.
- *
- * Every match is listed with its position and its capture groups, named ones
- * included — the part a "does it match" checkbox leaves out and the part you
- * are usually debugging. Pure and synchronous: the page runs it in a worker,
- * so a pattern that backtracks forever can be killed.
- */
 export type Mode = "matches" | "replace" | "split";
 
 export const FLAGS = ["g", "i", "m", "s", "u", "y"] as const;
@@ -38,7 +30,7 @@ export type RegexOutcome =
       ok: true;
       count: number;
       matches: RegexMatch[];
-      /** One entry per capture group: its name, or null for a numbered one. */
+
       groupNames: (string | null)[];
       truncated: boolean;
       replaced?: string;
@@ -133,7 +125,6 @@ const CAUSES: [RegExp, Localized][] = [
   ],
 ];
 
-/** A SyntaxError from any engine as one localized line; unknown causes fall back to the pattern itself. */
 export function describeSyntaxError(
   message: string,
   pattern: string,
@@ -152,7 +143,6 @@ export function describeSyntaxError(
   };
 }
 
-/** The name of each capture group in order, null for an unnamed one. */
 export function captureNames(pattern: string): (string | null)[] {
   const names: (string | null)[] = [];
   let inClass = false;
@@ -260,7 +250,6 @@ export function runRegex({
   return outcome;
 }
 
-/** The text a column copy gives: one value per line. */
 export function columnText(matches: RegexMatch[], group: number): string {
   return matches
     .map((match) =>
