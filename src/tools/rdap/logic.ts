@@ -7,14 +7,6 @@ import {
   type Tone,
 } from "../text-tool";
 
-/**
- * WHOIS, as RDAP — the protocol that replaced it.
- *
- * rdap.org redirects to whichever registry is authoritative, and the
- * registries answer with permissive CORS, so this runs from the browser. A
- * 404 that never left rdap.org means the TLD has no RDAP server; a 404 from
- * the registry means the domain is not registered.
- */
 type Vcard = unknown[];
 
 export type Entity = {
@@ -47,11 +39,6 @@ export type Target = { name: string; typed: string };
 const IPV4 = /^\d{1,3}(\.\d{1,3}){3}$/;
 const LABEL = /^(?!-)[a-z0-9-]{1,63}(?<!-)$/;
 
-/**
- * The registrable name from whatever was pasted: a URL loses its scheme,
- * path and port, a leading www. goes, and an internationalised name becomes
- * punycode. Throws before any request is made.
- */
 export function parseDomain(input: string): Target | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
@@ -106,7 +93,6 @@ function notADomain() {
   });
 }
 
-/** A note about what was actually asked, when it is not what was typed. */
 export function queryNote(input: string): Localized | null {
   let target: Target | null;
   try {
@@ -121,7 +107,6 @@ export function queryNote(input: string): Localized | null {
   };
 }
 
-/** "in 12 days", "3 years ago" — both languages, relative to `now`. */
 export function relativeTime(date: Date, now: Date): Localized {
   const days = Math.round((date.getTime() - now.getTime()) / DAY);
   const size = Math.abs(days);
