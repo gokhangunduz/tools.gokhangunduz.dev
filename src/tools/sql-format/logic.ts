@@ -1,7 +1,6 @@
 import type { Localized } from "@/i18n";
 import { ToolError, type TextPosition } from "../text-tool";
 
-// sql-formatter keys its reserved words off the dialect, so generic SQL leaves Postgres' RETURNING lowercase.
 export const DIALECTS = [
   "postgresql",
   "mysql",
