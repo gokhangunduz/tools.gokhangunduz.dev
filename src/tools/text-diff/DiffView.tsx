@@ -106,7 +106,6 @@ export default function DiffView({
   );
 }
 
-/** `marked` also strikes and underlines, for inline mode where no +/− column says which side a word is from. */
 function Inline({
   segments,
   marked = false,
