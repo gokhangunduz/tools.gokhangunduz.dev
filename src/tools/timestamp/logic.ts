@@ -10,13 +10,6 @@ import {
   wallClockIn,
 } from "../timezone/zones";
 
-/**
- * Whatever timestamp was pasted, in every form it might be needed in.
- *
- * The unit is read from the digit count: ten digits are seconds until 2286,
- * thirteen are milliseconds, sixteen microseconds, nineteen nanoseconds. That
- * is why the user does not have to say which one they have.
- */
 export type Unit = "s" | "ms" | "us" | "ns";
 export type UnitChoice = Unit | "auto";
 
@@ -110,10 +103,10 @@ export function parseInput(
 export type Description = {
   rows: ResultRow[];
   unit: Unit | null;
-  /** The input had no offset and was read as a wall clock in `zone`. */
+
   zoned: boolean;
   zone: string | null;
-  /** The zone option is wrong; the rows that do not need it are still there. */
+
   zoneError: ToolError | null;
   text: string;
 };
@@ -156,7 +149,6 @@ export function describe(
   return describeDate(parsed, locale, zone, zoneError, now);
 }
 
-/** The rows for an instant: also what the page shows for "now" while the input is empty. */
 export function describeDate(
   { date, unit, zoned }: Parsed,
   locale: Locale,
@@ -191,7 +183,6 @@ export function describeDate(
   return { rows, unit, zoned, zone, zoneError, text };
 }
 
-/** "3 gün önce" rather than a second timestamp to subtract by hand. */
 export function relative(date: Date, locale: Locale, now = new Date()): string {
   const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   const seconds = (date.getTime() - now.getTime()) / 1000;
