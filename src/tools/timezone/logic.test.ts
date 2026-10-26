@@ -46,11 +46,10 @@ describe("readInstant", () => {
   });
 
   it("reads HH:mm as today in the source zone", () => {
-    // 10:00 UTC is already 13:00 on the 25th in Istanbul.
     expect(readInstant("14:30", "Europe/Istanbul", NOW).toISOString()).toBe(
       "2026-09-25T11:30:00.000Z",
     );
-    // Tokyo is on the 25th too (19:00), so 08:15:30 there is 23:15:30 UTC the day before.
+
     expect(readInstant("08:15:30", "Asia/Tokyo", NOW).toISOString()).toBe(
       "2026-09-24T23:15:30.000Z",
     );

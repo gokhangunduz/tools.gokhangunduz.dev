@@ -7,16 +7,10 @@ import { browserZone, listZones, resolveZone } from "./zones";
 
 const noSubscription = () => () => {};
 
-/** The browser's zone once hydrated, UTC on the server, so both renders agree. */
 export function useBrowserZone(): string {
   return useSyncExternalStore(noSubscription, browserZone, () => "UTC");
 }
 
-/**
- * A time zone field that searches the engine's own list as you type. A native
- * datalist keeps it light: it filters by substring, so "istanbul" finds
- * Europe/Istanbul, and a city typed without its region is resolved on blur.
- */
 export default function ZoneInput({
   label,
   value,

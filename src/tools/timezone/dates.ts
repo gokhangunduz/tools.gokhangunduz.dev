@@ -116,12 +116,6 @@ function utcOf(clock: WallClock): number {
   return date.getTime();
 }
 
-/**
- * A written date. Without an offset it is read as a wall clock in `zone`
- * (`zoned: true`); with Z, UTC, GMT or ±HH[:MM] it is already an instant. A
- * bare time is today in `zone`. Returns null for text that is not a date form
- * at all, so the caller can try its own formats first.
- */
 export function readDateText(
   input: string,
   zone: string,
