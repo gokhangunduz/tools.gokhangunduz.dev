@@ -6,7 +6,6 @@ import { t, type Locale } from "@/i18n";
 import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
-/** An icon button that copies `value` and ticks for a moment. */
 export function CopyButton({
   locale,
   value,
@@ -52,7 +51,6 @@ export function CopyButton({
   );
 }
 
-/** True once `value` has stopped changing for `delay` ms, so an error does not flash mid-typing. */
 export function useSettled<T>(value: T, delay = 400): boolean {
   const [settled, setSettled] = React.useState(value);
   React.useEffect(() => {
@@ -62,7 +60,6 @@ export function useSettled<T>(value: T, delay = 400): boolean {
   return Object.is(settled, value);
 }
 
-/** The last result that was not an error, kept to show dimmed under one. */
 export function useLastGood<T>(result: T | null, reset: boolean): T | null {
   const [last, setLast] = React.useState<T | null>(null);
   if (result !== null && result !== last) setLast(result);
@@ -70,7 +67,6 @@ export function useLastGood<T>(result: T | null, reset: boolean): T | null {
   return result ?? (reset ? null : last);
 }
 
-/** The one-line input of a line tool, the same shape TextTool draws. */
 export function LineField({
   className,
   ...props

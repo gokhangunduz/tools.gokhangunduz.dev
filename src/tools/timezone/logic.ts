@@ -9,14 +9,6 @@ import {
   wallClockIn,
 } from "./zones";
 
-/**
- * One instant, in the zones a call actually gets scheduled across.
- *
- * The input is read *in a chosen zone* rather than in the browser's, because
- * the question is usually "the deploy window is 09:00 in Istanbul — what is
- * that in San Francisco", and typing a local time only to have it interpreted
- * as UTC is the mistake this is meant to prevent.
- */
 export const DEFAULT_ZONES = [
   "Europe/Istanbul",
   "UTC",
@@ -35,7 +27,7 @@ export type ZoneRow = {
   valid: boolean;
   time?: string;
   date?: string;
-  /** Calendar days ahead of (+) or behind (−) the source zone. */
+
   dayDelta?: number;
   offset?: string;
   iso?: string;
@@ -50,7 +42,6 @@ export type Conversion = {
   text: string;
 };
 
-/** Reads a wall-clock time as it would be read in `zone`. */
 export function readInstant(
   input: string,
   zone: string,
@@ -140,7 +131,6 @@ export function convertZones(
   };
 }
 
-/** "2026-09-25 14:30" for this moment in `zone`, for the Now button. */
 export function nowIn(zone: string, now = new Date()): string {
   const clock = wallClockIn(now, zone);
   return `${clock.year}-${pad(clock.month)}-${pad(clock.day)} ${pad(clock.hour)}:${pad(clock.minute)}`;

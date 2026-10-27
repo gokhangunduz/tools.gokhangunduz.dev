@@ -18,12 +18,6 @@ export type SharedValue = string | boolean | null;
 
 type State<T> = { input: string; direction: string; options: T };
 
-/**
- * Input, direction and options kept in the URL fragment, as TextTool does for
- * the tools it renders: read from the link until anything is touched, then
- * written back so the address bar is always the link to send. A null default
- * stands for "not chosen" (the browser's zone, say) and is left out of links.
- */
 export function useSharedState<T extends Record<string, SharedValue>>(
   defaults: State<T>,
 ): {
@@ -55,7 +49,7 @@ export function useSharedState<T extends Record<string, SharedValue>>(
       direction: shared?.direction ?? defaults.direction,
       options,
     };
-    // `defaults` is a module constant in every caller.
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash]);
   const [chosen, setChosen] = useState<State<T> | null>(null);
