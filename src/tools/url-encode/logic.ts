@@ -1,13 +1,5 @@
 import { positionAt, ToolError } from "../text-tool";
 
-/**
- * Percent-encoding in three scopes.
- *
- * "value" is `encodeURIComponent`, for a query value or a path segment: it
- * escapes `&`, `=`, `/` and `?`, which would otherwise change the URL around
- * it. "url" is `encodeURI`, for a URL that is already assembled. "form" is
- * the value scope with `+` for a space, as in form-encoded bodies.
- */
 export type Scope = "value" | "url" | "form";
 
 export function toScope(value: unknown): Scope {
@@ -66,7 +58,6 @@ export function decodeUrl(input: string, scope: Scope): string {
   }
 }
 
-/** Offset of the first run of escapes that is not valid UTF-8, or -1. */
 function firstNonUtf8(input: string): number {
   const decoder = new TextDecoder("utf-8", { fatal: true });
   for (const run of input.matchAll(/(?:%[0-9A-Fa-f]{2})+/g)) {
@@ -82,7 +73,6 @@ function firstNonUtf8(input: string): number {
   return -1;
 }
 
-/** Whether text meant for Encode already looks percent-encoded. */
 export function looksEncoded(input: string): boolean {
   if (!/%[0-9A-F]{2}/i.test(input)) return false;
   try {
