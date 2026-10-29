@@ -6,14 +6,6 @@ import {
   type TextResult,
 } from "../text-tool";
 
-/**
- * Takes a URL apart, including the query string.
- *
- * `new URL` is the parser — it is the same one the browser uses, so the answer
- * matches what a request would actually do rather than what a regex thinks.
- * Values are shown decoded, because the reason to open this tool is usually to
- * read a value that is unreadable encoded.
- */
 const RELATIVE_BASE = "http://relative.invalid";
 const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const HOST_PORT = /^[^/?#:@\s]+:\d+(?:[/?#]|$)/;
@@ -83,8 +75,7 @@ export function parseUrl(input: string): TextResult {
       }
     }
     if (url.username) parts.push(row("user", safeDecode(url.username)));
-    // Never printed back: a password in a URL is the one part of it that should
-    // not end up in a screenshot or a paste.
+
     if (url.password) {
       parts.push(row("password", "•".repeat(8), { tr: "gizli", en: "hidden" }));
     }
@@ -179,7 +170,6 @@ export function hostToUnicode(host: string): string {
     .join(".");
 }
 
-/** RFC 3492 decoding, for the `xn--` labels of an internationalized host. */
 export function decodePunycode(input: string): string {
   const base = 36;
   const tMin = 1;
