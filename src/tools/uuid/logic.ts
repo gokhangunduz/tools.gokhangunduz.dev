@@ -1,15 +1,6 @@
 import type { Localized } from "@/i18n";
 import { ToolError } from "../text-tool";
 
-/**
- * The identifier formats worth having, and the reason to pick between them.
- *
- * v4 is random and sorts arbitrarily; v7 carries a millisecond timestamp in
- * its first 48 bits, so a table keyed on it stays in insertion order and the
- * index does not fragment. ULID is the same idea in a shorter, case-insensitive
- * alphabet. Nano ID is not a UUID at all — it is a short random string for
- * URLs, which is what people actually want half the time they reach for one.
- */
 export type Kind = "v4" | "v7" | "ulid" | "nanoid";
 export type ListFormat = "lines" | "json" | "comma" | "sql";
 
@@ -61,11 +52,6 @@ export function formatIds(ids: string[], format: ListFormat): string {
 
 const v7State = { ms: -1, counter: 0 };
 
-/**
- * RFC 9562 v7 with the §6.2 counter: within one millisecond the 12-bit
- * rand_a is incremented rather than redrawn, so ids from one burst still sort
- * in the order they were made. It starts below 0x800 to leave room to count.
- */
 function uuidV7(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   let ms = Date.now();
@@ -101,7 +87,6 @@ const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const RANDOM_MAX = (1n << 80n) - 1n;
 const ulidState = { ms: -1, random: 0n };
 
-/** Monotonic ULID: the same millisecond increments the 80-bit random part. */
 function ulid(): string {
   let ms = Date.now();
   let random: bigint;
@@ -163,7 +148,6 @@ const VARIANTS: [RegExp, Localized][] = [
   [/^[ef]$/, { tr: "Ayrılmış", en: "Reserved" }],
 ];
 
-/** What the id says about itself — the reason to choose v7 over v4. */
 export function inspect(value: string): Inspection | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
@@ -233,7 +217,6 @@ const UUID_PATTERN =
   /[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}/i;
 const ULID_PATTERN = /[0-9A-HJKMNP-TV-Z]{26}/;
 
-/** The line under the list: what the chosen format is good for, or when the first id was made. */
 export function footnoteFor(kind: Kind, output: string): Localized {
   if (kind === "v4") {
     return {
