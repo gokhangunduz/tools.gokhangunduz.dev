@@ -1,7 +1,3 @@
-/**
- * piexifjs ships no types, and these four functions are the whole API this
- * project needs.
- */
 declare module "piexifjs" {
   type ExifDict = Record<string, Record<number, unknown>>;
 
