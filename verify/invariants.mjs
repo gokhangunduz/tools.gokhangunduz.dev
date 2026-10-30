@@ -1,12 +1,5 @@
-// The invariants a type-checker does not catch, for verify/invariants.sh:
-//
-//   1. src/i18n/tr.json and en.json have the same keys, and no empty value.
-//   2. Every object literal in src/ with a `tr` property has an `en` one and the
-//      reverse, and neither side is an empty string while the other is not.
-//   3. No colour literal (hex, rgb(), hsl(), oklch()) in UI code — src/components,
-//      src/app, and every .tsx/.css — outside src/app/globals.css, except the
-//      pairs frozen in verify/allowed-hex.txt. A tool's logic and spec may hold
-//      colours as data (the QR code's modules, an image's background).
+
+
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { createRequire } from "node:module";
@@ -18,7 +11,6 @@ const ts = require("typescript");
 const problems = [];
 const rel = (file) => relative(ROOT, file).split(sep).join("/");
 
-/* 1. shell dictionaries */
 function leaves(node, prefix = "", out = new Map()) {
   for (const [key, value] of Object.entries(node)) {
     const path = prefix ? `${prefix}.${key}` : key;
@@ -40,7 +32,6 @@ for (const [locale, other] of [["tr", "en"], ["en", "tr"]]) {
   }
 }
 
-/* 2 and 3 walk the sources */
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const full = join(dir, name);
@@ -94,7 +85,6 @@ for (const file of sources.filter((f) => /\.tsx?$/.test(f))) {
   visit(source);
 }
 
-/* 3. colour literals in UI code */
 const allowed = new Set(
   readFileSync(join(ROOT, "verify/allowed-hex.txt"), "utf8")
     .split("\n")

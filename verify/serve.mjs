@@ -1,8 +1,5 @@
-// A static server over a Next.js export, for verify/smoke.sh. It does what the
-// production host does with `out/`: `/x` serves `x.html` (or `x/index.html`),
-// and anything missing gets `404.html` with a 404. No dependencies.
-//
-//   node verify/serve.mjs <dir> [port]     (port 0, the default, picks a free one)
+
+
 import { createServer } from "node:http";
 import { createReadStream, statSync } from "node:fs";
 import { extname, join, normalize, resolve, sep } from "node:path";
