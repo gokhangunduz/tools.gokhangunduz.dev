@@ -8,7 +8,7 @@ export default function SiteFooter({ locale }: { locale: Locale }) {
         <ShieldCheck className="mt-px size-3.5 shrink-0 text-success" />
         {t(locale, "footer.privacy")}
       </p>
-      <p className="pl-5.5">© {new Date().getFullYear()} Gökhan Gündüz</p>
+      <p className="pl-5.5">© 2025 Gökhan Gündüz</p>
     </footer>
   );
 }
